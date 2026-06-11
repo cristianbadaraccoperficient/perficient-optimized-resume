@@ -52,9 +52,14 @@ Web application to adapt a consultant's resume to match specific job description
 
 ### 1. Initial Setup (One-time)
 ```
-User uploads resume (PDF/DOCX/text) + explanation document
-  → Backend parses and stores as structured JSON
-  → Persisted in /data/resume.json and /data/explanation.md
+User uploads resume (PDF/DOCX/text)
+  → Backend parses, Claude Haiku converts to structured Markdown
+  → Persisted in /data/resume.json and /data/resume-raw.md
+
+User provides explanation (strategic context)
+  → Backend saves raw text, Claude Haiku converts to structured Markdown
+  → Persisted in /data/explanation.json (raw_text + formatted_md)
+  → Also written to /data/explanation-raw.md and /data/explanation-formatted.md
 ```
 
 ### 2. Adaptation Flow

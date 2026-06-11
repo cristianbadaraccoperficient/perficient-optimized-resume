@@ -7,6 +7,7 @@ interface ExplanationInputProps {
   onSaveError: (error: string) => void;
   currentStatus: 'idle' | 'saved';
   initialContent?: string | null;
+  initialFormattedMd?: string | null;
 }
 
 const MAX_LENGTH = 50000;
@@ -16,30 +17,39 @@ export default function ExplanationInput({
   onSaveError,
   currentStatus,
   initialContent,
+  initialFormattedMd,
 }: ExplanationInputProps) {
   const [content, setContent] = useState(initialContent || '');
   const [state, setState] = useState<'idle' | 'editing' | 'saving' | 'saved' | 'error'>(
     currentStatus === 'saved' ? 'saved' : 'idle'
   );
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [warningMessage, setWarningMessage] = useState<string | null>(null);
+  const [formattedMd, setFormattedMd] = useState<string | null>(initialFormattedMd || null);
+  const [showPreview, setShowPreview] = useState(false);
 
   useEffect(() => {
     if (initialContent) setContent(initialContent);
   }, [initialContent]);
 
   useEffect(() => {
-    if (currentStatus === 'saved' && state !== 'saved') {
+    if (initialFormattedMd) setFormattedMd(initialFormattedMd);
+  }, [initialFormattedMd]);
+
+  useEffect(() => {
+    if (currentStatus === 'saved') {
       setState('saved');
-    } else if (currentStatus === 'idle' && state === 'saved') {
+    } else if (currentStatus === 'idle') {
       setState('idle');
     }
-  }, [currentStatus, state]);
+  }, [currentStatus]);
 
   const handleSave = async () => {
     if (!content.trim() || content.length > MAX_LENGTH) return;
 
     setState('saving');
     setErrorMessage(null);
+    setWarningMessage(null);
 
     try {
       const response = await fetch('/api/explanation', {
@@ -59,6 +69,17 @@ export default function ExplanationInput({
       }
 
       setState('saved');
+
+      if (data.data.formatted) {
+        const getRes = await fetch('/api/explanation');
+        const getData = await getRes.json();
+        if (getData.formatted_md) {
+          setFormattedMd(getData.formatted_md);
+        }
+      } else if (data.data.format_error) {
+        setWarningMessage('Saved, but auto-formatting unavailable');
+      }
+
       onSaveSuccess();
     } catch {
       const message = 'Connection failed. Check your network.';
@@ -71,6 +92,8 @@ export default function ExplanationInput({
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setContent(e.target.value);
     if (state !== 'editing') setState('editing');
+    setFormattedMd(null);
+    setShowPreview(false);
   };
 
   const canSave = content.trim().length > 0 && content.length <= MAX_LENGTH && state !== 'saving';
@@ -87,34 +110,51 @@ export default function ExplanationInput({
         </span>
       </div>
 
-      {/* Textarea */}
+      {/* Textarea / Preview */}
       <div className="px-4 pb-3">
-        <textarea
-          aria-label="Strategic context"
-          value={content}
-          onChange={handleChange}
-          disabled={state === 'saving'}
-          readOnly={state === 'saved'}
-          placeholder="What makes you the right fit that isn't on your resume?"
-          className={`w-full min-h-[120px] p-2 border border-gray-200 rounded text-sm resize-y focus:outline-none focus:border-gray-400 ${
-            state === 'saving' || state === 'saved'
-              ? 'bg-gray-50 text-gray-600'
-              : 'bg-white text-gray-900'
-          } ${errorMessage ? 'border-red-300' : ''}`}
-        />
+        {showPreview && formattedMd ? (
+          <div className="w-full min-h-[120px] p-2 border border-gray-200 rounded text-sm bg-gray-50 text-gray-700 overflow-y-auto max-h-[300px] whitespace-pre-wrap">
+            {formattedMd}
+          </div>
+        ) : (
+          <textarea
+            aria-label="Strategic context"
+            value={content}
+            onChange={handleChange}
+            disabled={state === 'saving'}
+            readOnly={state === 'saved'}
+            placeholder="What makes you the right fit that isn't on your resume?"
+            className={`w-full min-h-[120px] p-2 border border-gray-200 rounded text-sm resize-y focus:outline-none focus:border-gray-400 ${
+              state === 'saving' || state === 'saved'
+                ? 'bg-gray-50 text-gray-600'
+                : 'bg-white text-gray-900'
+            } ${errorMessage ? 'border-red-300' : ''}`}
+          />
+        )}
       </div>
 
       {/* Footer row */}
       <div className="flex items-center justify-end px-4 pb-3 gap-3">
+        {warningMessage && (
+          <span className="text-xs text-amber-500">{warningMessage}</span>
+        )}
         {state === 'saved' && (
           <span className="text-xs text-gray-400">Saved</span>
         )}
         {errorMessage && (
           <span role="alert" className="text-xs text-red-500">{errorMessage}</span>
         )}
+        {state === 'saved' && formattedMd && (
+          <button
+            onClick={() => setShowPreview(!showPreview)}
+            className="text-xs text-gray-500 hover:text-gray-800 underline"
+          >
+            {showPreview ? 'Raw' : 'Preview'}
+          </button>
+        )}
         {state === 'saved' ? (
           <button
-            onClick={() => setState('editing')}
+            onClick={() => { setState('editing'); setShowPreview(false); }}
             className="text-xs text-gray-500 hover:text-gray-800 underline"
           >
             Edit
@@ -136,7 +176,7 @@ export default function ExplanationInput({
                 : 'border-gray-200 text-gray-300 cursor-not-allowed'
             }`}
           >
-            {state === 'saving' ? 'Saving...' : 'Save'}
+            {state === 'saving' ? 'Processing...' : 'Save'}
           </button>
         )}
       </div>

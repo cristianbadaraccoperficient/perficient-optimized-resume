@@ -72,7 +72,7 @@ Retrieve the stored resume.
 
 ### POST /api/explanation
 
-Upload the explanation/context document.
+Store and auto-format the explanation/strategic context document. The raw text is saved immediately, then Claude Haiku converts it to structured Markdown.
 
 **Request:**
 ```json
@@ -81,30 +81,57 @@ Upload the explanation/context document.
 }
 ```
 
-Or multipart with file upload.
-
 **Response (200):**
 ```json
 {
   "success": true,
-  "message": "Explanation saved successfully",
+  "message": "Explanation saved and formatted successfully",
   "data": {
-    "length": 1200
+    "length": 1200,
+    "formatted": true
   }
 }
 ```
+
+**Response (200, formatting unavailable):**
+```json
+{
+  "success": true,
+  "message": "Explanation saved (formatting unavailable)",
+  "data": {
+    "length": 1200,
+    "formatted": false,
+    "format_error": "AI formatting service is not configured"
+  }
+}
+```
+
+**Errors:**
+- 400: No content or content too long (>50000 chars)
+- 500: Storage error
 
 ---
 
 ### GET /api/explanation
 
-Retrieve the stored explanation.
+Retrieve the stored explanation (raw text + structured Markdown).
 
 **Response (200):**
 ```json
 {
   "exists": true,
-  "content": "Full text of the explanation...",
+  "content": "Full raw text of the explanation...",
+  "formatted_md": "## Intelitrex\n\n- **React**, **TypeScript**...",
+  "updated_at": "2024-01-15T10:35:00Z"
+}
+```
+
+**Response (200, not formatted):**
+```json
+{
+  "exists": true,
+  "content": "Full raw text...",
+  "formatted_md": null,
   "updated_at": "2024-01-15T10:35:00Z"
 }
 ```

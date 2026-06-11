@@ -4,19 +4,21 @@
 
 ### F1: Resume & Explanation Upload
 
-**Description:** User uploads their base resume and an optional explanation document that provides context about their experience.
+**Description:** User uploads their base resume and an optional explanation document that provides context about their experience. Both are auto-formatted into structured Markdown via Claude Haiku for optimal AI consumption.
 
 **Behavior:**
 - Accept resume in PDF, DOCX, or plain text format
-- Accept explanation as text (paste or file upload)
+- Accept explanation as text (paste in textarea)
 - Parse uploaded files to extract text content
+- Auto-format both inputs into structured Markdown via Claude Haiku
 - Store persistently so they're available on every session
 - Show current stored resume/explanation on the main page
-- Allow re-upload to replace existing documents
+- Allow re-upload/re-edit to replace existing documents
+- Preview toggle shows the structured Markdown version of the explanation
 
 **Persistence:**
-- Resume stored as `/data/resume.json` (structured) and `/data/resume-raw.md` (original text)
-- Explanation stored as `/data/explanation.md`
+- Resume stored as `/data/resume.json` (raw_text + formatted_md) and `/data/resume-raw.md`
+- Explanation stored as `/data/explanation.json` (raw_text + formatted_md), `/data/explanation-raw.md`, and `/data/explanation-formatted.md`
 
 ---
 

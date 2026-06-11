@@ -70,7 +70,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const explanation = await readMarkdown('explanation.md');
+    let explanation: string | null = null;
+    const explanationData = await readJSON<{ raw_text: string; formatted_md: string | null }>('explanation.json');
+    if (explanationData) {
+      explanation = explanationData.formatted_md || explanationData.raw_text;
+    } else {
+      explanation = await readMarkdown('explanation.md');
+    }
 
     const modelToUse = model || '@dsvertex/anthropic.claude-sonnet-4-6@20250514';
 

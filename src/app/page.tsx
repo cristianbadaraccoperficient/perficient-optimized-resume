@@ -23,6 +23,7 @@ export default function Home() {
   const [explanationContent, setExplanationContent] = useState<string | null>(
     null,
   );
+  const [explanationFormattedMd, setExplanationFormattedMd] = useState<string | null>(null);
   const [jobDescription, setJobDescription] = useState<string>("");
   const [adaptationResult, setAdaptationResult] =
     useState<AdaptationResult | null>(null);
@@ -48,6 +49,7 @@ export default function Home() {
         if (explanationData.exists) {
           setExplanationStatus("saved");
           setExplanationContent(explanationData.content);
+          setExplanationFormattedMd(explanationData.formatted_md || null);
         }
       } catch {
         // Silent fail on initial load
@@ -136,6 +138,7 @@ export default function Home() {
             onSaveError={() => {}}
             currentStatus={explanationStatus}
             initialContent={explanationContent}
+            initialFormattedMd={explanationFormattedMd}
           />
 
           <JobDescriptionInput

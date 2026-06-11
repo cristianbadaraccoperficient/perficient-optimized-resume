@@ -2,7 +2,9 @@
 
 ## Overview
 
-The system uses a single main prompt to Claude (via Portkey) that returns a structured JSON response containing all outputs: adapted resume + interview insights.
+The system uses Claude (via Portkey) at two stages:
+1. **Formatting stage** — Claude Haiku structures raw resume and explanation text into clean Markdown (on upload/save)
+2. **Adaptation stage** — Claude Sonnet processes the structured inputs against a job description, returning a JSON response with adapted resume + interview insights
 
 ## Main Adaptation Prompt
 
@@ -80,12 +82,45 @@ Return a JSON object with this exact structure:
 Analyze the job description and adapt my resume to maximize fit while maintaining truthfulness. Also provide interview preparation insights.
 ```
 
+## Explanation Formatting Prompt (Haiku)
+
+### System Prompt
+
+```
+You are a professional content structurer. Convert the following free-form professional context narrative into clean, well-organized Markdown.
+
+Rules:
+- Use ## headings to group by company or engagement
+- Use bullet points for individual achievements, responsibilities, and skills
+- Use **bold** for key technologies, methodologies, and skills
+- Use ### subheadings for sub-themes within a company (e.g., "### Technical Leadership", "### Key Achievements")
+- If the text mentions multiple companies or projects, create separate sections for each
+- If the text is thematic rather than company-based, group by theme
+- Preserve ALL original content — do not summarize, rephrase, or omit anything
+- Add structure and formatting only — the meaning must remain identical
+- Output ONLY the markdown, no explanations or preamble
+```
+
+### Purpose
+
+Both the resume and explanation are pre-formatted into structured Markdown before being sent to the adaptation model. This ensures:
+- Consistent input quality regardless of how the user typed their text
+- Clear section boundaries that the adaptation model can map between resume experience and explanation context
+- Better extraction of keywords, skills, and achievements
+
+### Model
+
+Claude Haiku 4.5 — fast and cheap, suitable for formatting tasks (~$0.001 per call).
+
+---
+
 ## Prompt Design Principles
 
 1. **Structured output** — JSON format ensures reliable parsing for PDF generation and UI rendering
 2. **Truthfulness constraint** — Explicitly forbids fabrication; adaptation is about framing, not inventing
 3. **Context-rich** — Including the explanation gives Claude background that isn't in the resume itself (e.g., why the candidate left a role, what they actually did vs. title)
-4. **Actionable insights** — Strengths include talking points; gaps include mitigations; transferable skills include bridge statements
+4. **Pre-structured inputs** — Both resume and explanation are formatted into clean Markdown by Haiku before reaching the adaptation prompt, reducing noise and ambiguity
+5. **Actionable insights** — Strengths include talking points; gaps include mitigations; transferable skills include bridge statements
 
 ## Token Estimation
 

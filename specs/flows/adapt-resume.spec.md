@@ -7,7 +7,8 @@ User provides a job description and receives an AI-adapted resume with interview
 ## Preconditions
 
 - Resume is uploaded, parsed, and formatted as structured Markdown
-- Explanation is stored (optional but recommended)
+- Explanation is stored and formatted as structured Markdown (optional but recommended)
+  - The adapt endpoint prefers `formatted_md` from `explanation.json`, falls back to `raw_text`, then to legacy `explanation.md`
 
 ## Steps
 
