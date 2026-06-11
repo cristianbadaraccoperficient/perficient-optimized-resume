@@ -3,7 +3,7 @@
 ## System Purpose
 
 Web application to adapt a consultant's resume to match specific job descriptions, outputting:
-1. An adapted resume in the company's standard PDF format
+1. An adapted resume in the company's standard DOCX format
 2. Interview preparation insights (strengths, gaps, transferable skills)
 
 ## High-Level Architecture
@@ -14,7 +14,7 @@ Web application to adapt a consultant's resume to match specific job description
 ├─────────────────────────────────────────────────────┤
 │  Upload/Edit Resume & Explanation                    │
 │  Paste Job Description                              │
-│  View Results (PDF + Insights Panel)                │
+│  View Results (DOCX Download + Insights Panel)      │
 └─────────────┬───────────────────────────────────────┘
               │ API Routes
 ┌─────────────▼───────────────────────────────────────┐
@@ -22,7 +22,7 @@ Web application to adapt a consultant's resume to match specific job description
 ├─────────────────────────────────────────────────────┤
 │  /api/resume      → CRUD resume & explanation       │
 │  /api/adapt       → Trigger adaptation pipeline     │
-│  /api/generate-pdf→ Generate PDF from adapted data  │
+│  /api/export      → Generate DOCX from adapted data │
 └──────┬──────────────────────────┬───────────────────┘
        │                          │
 ┌──────▼──────┐          ┌───────▼────────┐
@@ -40,11 +40,11 @@ Web application to adapt a consultant's resume to match specific job description
 
 | Layer          | Technology            | Rationale                                      |
 |----------------|-----------------------|------------------------------------------------|
-| Frontend       | Next.js 14 (App Router) | Full-stack in one, React-based, fast dev      |
+| Frontend       | Next.js 15 (App Router) | Full-stack in one, React-based, fast dev      |
 | Styling        | Tailwind CSS          | Rapid prototyping, consistent design           |
 | AI Gateway     | Portkey               | Observability, fallbacks, caching, model-agnostic |
 | LLM            | Claude (via Portkey)  | Strong reasoning for resume analysis           |
-| PDF Generation | Puppeteer / react-pdf | Pixel-perfect PDF from HTML template           |
+| DOCX Generation | docxtemplater / pizzip | Native DOCX from Perficient corporate template |
 | Persistence    | Local JSON files      | Simple, no DB needed for single-user           |
 | Deployment     | Local / Vercel        | Flexible deployment options                    |
 
@@ -71,8 +71,8 @@ User pastes Job Description
       gaps: [...],
       transferable_skills: [...]
     }
-  → Backend generates PDF from adapted_resume
-  → Frontend displays PDF download + insights panel
+  → Backend generates DOCX from adapted_resume using Perficient template
+  → Frontend displays DOCX download + insights panel
 ```
 
 ## Key Design Decisions
@@ -85,6 +85,6 @@ User pastes Job Description
 
 2. **Local file persistence** — For a single-user tool, JSON files are simpler than a database. Resume and explanation are loaded on every adaptation request as context.
 
-3. **Structured AI output** — Claude returns JSON with clearly separated sections, making it easy to render the PDF and the insights panel independently.
+3. **Structured AI output** — Claude returns JSON with clearly separated sections, making it easy to render the DOCX and the insights panel independently.
 
-4. **Template-driven PDF** — The company format is defined as an HTML/CSS template. The adapted content fills into this template, then Puppeteer renders it to PDF.
+4. **Template-driven DOCX** — The company format is defined as a .docx template with placeholder tags. The adapted content fills into this template via docxtemplater, producing a native Word document that preserves all corporate styles, logo, and formatting.

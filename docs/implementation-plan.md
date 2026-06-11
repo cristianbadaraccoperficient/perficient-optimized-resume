@@ -61,23 +61,23 @@
 
 ---
 
-## Phase 4: PDF Generation
+## Phase 4: DOCX Generation
 
-### Step 4.1: Company Template
-- Convert company resume format to HTML/CSS template
-- Use Handlebars for dynamic content injection
-- Ensure template matches company standards exactly
+### Step 4.1: Template Preparation
+- Prepare Perficient .docx template with docxtemplater placeholder tags
+- Map adapted resume JSON fields to template placeholders
+- Verify template produces valid DOCX when filled
 
-### Step 4.2: PDF Rendering
-- Set up Puppeteer for server-side HTML→PDF
-- `GET /api/pdf` — Generate and return PDF from last adaptation
-- Handle page breaks, margins, fonts
+### Step 4.2: DOCX Rendering
+- Set up docxtemplater + pizzip for server-side DOCX generation
+- `GET /api/export` — Generate and return DOCX from last adaptation
+- Handle multi-entry loops (experience bullets, skills lists)
 
-### Step 4.3: PDF Preview & Download
-- In-browser PDF preview (iframe or react-pdf viewer)
-- Download button
+### Step 4.3: Download
+- Download button triggers DOCX file download
+- Filename: `{firstname}-{lastname}-resume.docx`
 
-**Deliverable:** Full pipeline from JD input → adapted PDF download
+**Deliverable:** Full pipeline from JD input → adapted DOCX download
 
 ---
 
@@ -94,7 +94,7 @@
 
 ### Step 5.3: Final Testing
 - Test with various JD formats
-- Validate PDF output matches company format
+- Validate DOCX output matches company format
 - Performance optimization
 
 **Deliverable:** Production-ready application
@@ -108,7 +108,7 @@
 | 1     | ~1 hour   | Setup, configs, structure      |
 | 2     | ~2 hours  | Upload, parsing, persistence   |
 | 3     | ~3 hours  | AI integration, prompts, UI    |
-| 4     | ~2 hours  | PDF template and generation    |
+| 4     | ~2 hours  | DOCX template and generation   |
 | 5     | ~1 hour   | Polish and testing             |
 | **Total** | **~9 hours** | Full V1 implementation    |
 

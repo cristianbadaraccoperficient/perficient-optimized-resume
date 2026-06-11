@@ -15,8 +15,7 @@ Tech stack:
 - Tailwind CSS 3
 - Zod (schema validation)
 - Portkey AI (Claude integration)
-- Puppeteer (PDF generation)
-- Handlebars (HTML templates)
+- docxtemplater + pizzip (DOCX generation from template)
 
 ## Input
 

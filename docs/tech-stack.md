@@ -48,22 +48,29 @@ const response = await portkey.chat.completions.create({
 4. **Guardrails** — Can add content filters, budget limits
 5. **A/B Testing** — Easy to compare Claude Opus vs Sonnet results
 
-## PDF Generation
+## DOCX Generation
 
 | Package        | Version | Purpose                          |
 |----------------|---------|----------------------------------|
-| puppeteer      | latest  | HTML→PDF rendering               |
-| handlebars     | latest  | HTML template engine for resume  |
+| docxtemplater  | latest  | Template-based DOCX generation   |
+| pizzip         | latest  | ZIP manipulation for DOCX files  |
 
-### PDF Pipeline
+### DOCX Pipeline
 
 ```
 Adapted resume data (JSON)
-  → Handlebars template (company format HTML/CSS)
-  → Rendered HTML string
-  → Puppeteer renders to PDF buffer
+  → Load Perficient .docx template (templates/perficient-resume.docx)
+  → docxtemplater fills placeholder tags with data
+  → Generated DOCX binary
   → Sent as download response
 ```
+
+### Why DOCX over PDF?
+
+1. **100% fidelity** — Uses the real Perficient template with all corporate styles
+2. **Editable** — User can tweak the result in Word before submitting
+3. **Logo, headers, footers** — Preserved automatically from template
+4. **No rendering issues** — No CSS→PDF conversion quirks
 
 ## File Parsing (Resume Upload)
 
@@ -111,24 +118,23 @@ perficient-optimized-resume/
 │   │       │   └── route.ts   # Upload/get explanation
 │   │       ├── adapt/
 │   │       │   └── route.ts   # Trigger adaptation
-│   │       └── pdf/
-│   │           └── route.ts   # Generate & serve PDF
+│   │       └── export/
+│   │           └── route.ts   # Generate & serve DOCX
 │   ├── components/            # React components
 │   │   ├── ResumeUpload.tsx
 │   │   ├── JobDescriptionInput.tsx
 │   │   ├── ResultsPanel.tsx
-│   │   ├── PdfPreview.tsx
 │   │   ├── StrengthsTab.tsx
 │   │   ├── GapsTab.tsx
 │   │   └── TransferableTab.tsx
 │   ├── lib/
 │   │   ├── portkey.ts         # Portkey client setup
 │   │   ├── prompts.ts         # AI prompt templates
-│   │   ├── pdf-generator.ts   # PDF generation logic
+│   │   ├── docx-generator.ts  # DOCX generation logic
 │   │   ├── file-parser.ts     # PDF/DOCX text extraction
 │   │   └── storage.ts         # Read/write data files
-│   └── templates/
-│       └── resume-template.hbs # Company format HTML template
+├── templates/
+│   └── perficient-resume.docx # Company DOCX template with placeholder tags
 ├── public/                    # Static assets
 ├── .env.local                 # Environment variables (gitignored)
 ├── .gitignore

@@ -68,13 +68,13 @@ Tasks are tracked inline. Each spec's acceptance criteria serve as the task chec
 | ResultsPanel component | components/results-panel.spec.md | spec-ready |
 | Adapt Resume flow | flows/adapt-resume.spec.md | spec-ready |
 
-### Phase 4: PDF Generation
+### Phase 4: DOCX Generation
 
 | Task | Spec | State |
 |------|------|-------|
-| GET /api/pdf | contracts/pdf.spec.md | spec-ready |
-| Company HTML template | N/A (needs user input) | spec-pending |
-| Download PDF flow | flows/download-pdf.spec.md | spec-ready |
+| GET /api/export | contracts/export.spec.md | spec-ready |
+| Perficient DOCX template with placeholders | contracts/export.spec.md (template mapping) | spec-ready |
+| Download Resume flow | flows/download-resume.spec.md | spec-ready |
 
 ## Agent Roles
 

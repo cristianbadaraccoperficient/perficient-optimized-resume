@@ -190,24 +190,21 @@ Trigger resume adaptation against a job description.
 
 ---
 
-### GET /api/pdf
+### GET /api/export
 
-Generate and download the adapted resume as PDF.
-
-**Query Parameters:**
-- `action`: `download` | `preview` (default: download)
+Generate and download the adapted resume as DOCX using the Perficient corporate template.
 
 **Response (200):**
 ```
-Content-Type: application/pdf
-Content-Disposition: attachment; filename="adapted-resume.pdf"
+Content-Type: application/vnd.openxmlformats-officedocument.wordprocessingml.document
+Content-Disposition: attachment; filename="{firstname}-{lastname}-resume.docx"
 
-(PDF binary)
+(DOCX binary)
 ```
 
 **Errors:**
 - 404: No adaptation result available (must run /adapt first)
-- 500: PDF generation error
+- 500: DOCX generation error
 
 ---
 

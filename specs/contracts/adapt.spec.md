@@ -113,5 +113,5 @@ Trigger AI-powered resume adaptation against a job description. Returns adapted 
 - [ ] AI response is validated against Zod schema before returning
 - [ ] Handles AI timeout with clear error message
 - [ ] Respects rate limit of 10 requests/minute
-- [ ] Stores adaptation result for PDF generation
+- [ ] Stores adaptation result for DOCX generation
 - [ ] Never includes fabricated experience

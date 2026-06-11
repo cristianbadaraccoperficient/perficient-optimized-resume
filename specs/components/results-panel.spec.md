@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Displays adaptation results with tabbed navigation: PDF Preview, Strengths, Gaps, and Transferable Skills.
+Displays adaptation results with tabbed navigation: Strengths, Gaps, Transferable Skills, and a Download action.
 
 ## Props
 
@@ -22,9 +22,10 @@ Displays adaptation results with tabbed navigation: PDF Preview, Strengths, Gaps
 ## Sub-components
 
 ### TabBar
-- Tabs: "PDF Preview" | "Strengths" | "Gaps" | "Transferable"
+- Tabs: "Strengths" | "Gaps" | "Transferable"
 - Active tab visually highlighted
 - Keyboard navigable (arrow keys between tabs)
+- "Download DOCX" button positioned outside tabs (always visible)
 
 ### StrengthsTab
 - List of strength cards
@@ -40,15 +41,11 @@ Displays adaptation results with tabbed navigation: PDF Preview, Strengths, Gaps
 - List of transferable skill cards
 - Each card shows: skill, source experience, relevance, bridge statement
 
-### PdfPreview
-- Embedded PDF viewer (iframe)
-- "Download PDF" button
-
 ## Interactions
 
 - Click tab -> switch content
 - Arrow Left/Right on tab -> navigate tabs
-- Click "Download PDF" -> trigger file download
+- Click "Download DOCX" -> trigger file download (GET /api/export)
 
 ## Accessibility
 
@@ -62,9 +59,9 @@ Displays adaptation results with tabbed navigation: PDF Preview, Strengths, Gaps
 
 - [ ] Shows placeholder when no results
 - [ ] Shows skeleton loaders during loading
-- [ ] Renders all 4 tabs with correct content
+- [ ] Renders all 3 tabs with correct content
 - [ ] Tab switching works via click and keyboard
-- [ ] PDF preview loads embedded PDF
-- [ ] Download button triggers file download
+- [ ] "Download DOCX" button triggers file download
+- [ ] "Download DOCX" button disabled when no adaptation exists
 - [ ] Gap severity is conveyed via text + color (not color alone)
 - [ ] Responsive: tabs stack or scroll on mobile

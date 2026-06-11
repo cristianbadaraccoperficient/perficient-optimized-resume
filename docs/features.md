@@ -50,16 +50,16 @@
 
 ---
 
-### F4: PDF Generation
+### F4: DOCX Export
 
-**Description:** Generate a PDF of the adapted resume in the company's standard format.
+**Description:** Generate a DOCX of the adapted resume using the Perficient corporate template.
 
 **Behavior:**
-- Use company template (HTML/CSS based)
-- Fill adapted content into template sections
-- Render to PDF via Puppeteer
+- Use Perficient .docx template as base (preserves logo, styles, headers, footers)
+- Fill adapted content into template placeholder tags via docxtemplater
+- Generate native DOCX file (editable in Word)
 - Provide download button
-- Show PDF preview in-browser
+- Filename: `{firstname}-{lastname}-resume.docx`
 
 ---
 
@@ -108,11 +108,11 @@
 │  └───────────────────────────────────────────────────┘  │
 │                                                         │
 │  ┌─── Right Panel (60%) ─────────────────────────────┐  │
-│  │ Tabs: [PDF Preview] [Strengths] [Gaps] [Transfer] │  │
+│  │ [Download DOCX]                                   │  │
+│  │ Tabs: [Strengths] [Gaps] [Transferable]           │  │
 │  │                                                   │  │
 │  │ (Content based on selected tab)                   │  │
 │  │                                                   │  │
-│  │ [Download PDF]                                    │  │
 │  └───────────────────────────────────────────────────┘  │
 │                                                         │
 └─────────────────────────────────────────────────────────┘
