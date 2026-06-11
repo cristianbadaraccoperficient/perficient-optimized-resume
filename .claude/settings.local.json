@@ -25,7 +25,15 @@
       "Bash(npx next *)",
       "Bash(node -e \"const pkg = require\\('./node_modules/pdf-parse/package.json'\\); console.log\\(pkg.version\\)\")",
       "Bash(node -e \"const pdfParse = require\\('pdf-parse'\\); console.log\\(typeof pdfParse, Object.keys\\(pdfParse\\)\\)\")",
-      "Bash(node -e \"import\\('pdf-parse'\\).then\\(m => { const p = new m.PDFParse\\({ data: Buffer.from\\('test'\\) }\\); console.log\\(Object.getOwnPropertyNames\\(Object.getPrototypeOf\\(p\\)\\)\\) }\\)\")"
+      "Bash(node -e \"import\\('pdf-parse'\\).then\\(m => { const p = new m.PDFParse\\({ data: Buffer.from\\('test'\\) }\\); console.log\\(Object.getOwnPropertyNames\\(Object.getPrototypeOf\\(p\\)\\)\\) }\\)\")",
+      "Bash(node -e ' *)",
+      "Bash(npx tsx *)",
+      "Bash(ls node_modules/@types/pizzip)",
+      "Bash(ls node_modules/pizzip/index.d.ts)",
+      "Bash(ls node_modules/docxtemplater/types)",
+      "Bash(ls node_modules/docxtemplater/*.d.ts)",
+      "Bash(node -e \"const d=require\\('fs'\\).readFileSync\\(0,'utf8'\\); const p=JSON.parse\\(d\\); console.log\\('types:', p.types\\); console.log\\('main:', p.main\\);\")",
+      "Bash(node -e \"const d=require\\('fs'\\).readFileSync\\(0,'utf8'\\); const p=JSON.parse\\(d\\); console.log\\('types:', p.types, 'typings:', p.typings, 'main:', p.main\\);\")"
     ]
   }
 }

@@ -8,75 +8,58 @@ Generate and serve the adapted resume as a DOCX file using the Perficient corpor
 
 - Method: GET
 - Content-Type: N/A
-- Query Parameters: none
+- Body/Params: none
 
 ## Validation
 
-- None (endpoint is simple GET)
+- None (parameterless GET)
 
 ## Preconditions
 
-- An adaptation result must exist (from a prior POST /api/adapt call)
-- Template file must exist at `templates/perficient-resume.docx`
+- An adaptation result must exist (from a prior successful POST /api/adapt call)
+- The Perficient DOCX template must be available on the server
 
 ## Response (200)
 
 ```
 Content-Type: application/vnd.openxmlformats-officedocument.wordprocessingml.document
-Content-Disposition: attachment; filename="{firstname}-{lastname}-resume.docx"
+Content-Disposition: attachment; filename="jane-smith-resume.docx"
 
-(DOCX binary)
+(DOCX binary stream)
 ```
 
-## Pipeline
-
-```
-data/last-adaptation.json (adapted resume data)
-  → Load templates/perficient-resume.docx via pizzip
-  → docxtemplater fills placeholder tags with adaptation data
-  → Generated DOCX buffer
-  → Response as file download
-```
-
-## Template Mapping
-
-| Placeholder | Source Field |
-|-------------|-------------|
-| `{firstName}` | adapted_resume.name.first |
-| `{lastName}` | adapted_resume.name.last |
-| `{title}` | adapted_resume.title |
-| `{professionalOverview}` | adapted_resume.summary |
-| `{#roles}{.}{/roles}` | adapted_resume.roles[] |
-| `{#solutions}{.}{/solutions}` | adapted_resume.technical_skills[] |
-| `{#industries}{.}{/industries}` | adapted_resume.industries[] |
-| `{#technologies}{.}{/technologies}` | adapted_resume.technologies[] |
-| `{#keyEngagements}` | adapted_resume.key_engagements[] |
-| `{company}`, `{role}`, `{description}` | per engagement |
-| `{#education}{institution}`, `{degree}`, `{year}{/education}` | adapted_resume.education[] |
-| `{#certifications}{.}{/certifications}` | adapted_resume.certifications[] |
-| `{#experience}` | adapted_resume.experience[] (detailed) |
-| `{company}`, `{role}`, `{period}` | per experience entry |
-| `{projectDescription}` | experience[].description |
-| `{#bullets}{.}{/bullets}` | experience[].bullets[] |
-| `{#businessValue}{.}{/businessValue}` | experience[].business_value[] |
+The generated DOCX contains the adapted resume content rendered into the Perficient corporate template, preserving:
+- Company logo in header
+- "Proprietary and Confidential" footer
+- Corporate paragraph styles (headings, body text, list items)
+- Section structure: Name/Title, Professional Overview, Roles, Solutions, Industries, Technologies, Key Engagements, Education, Certifications, Experience (with responsibilities and business value)
 
 ## Error Cases
 
 | Condition | Code | Error Code |
 |-----------|------|------------|
-| No adaptation result | 404 | ADAPTATION_NOT_FOUND |
-| Template file missing | 500 | TEMPLATE_NOT_FOUND |
-| Template rendering failure | 500 | TEMPLATE_ERROR |
+| No adaptation result exists | 404 | ADAPTATION_NOT_FOUND |
+| Template unavailable | 500 | TEMPLATE_NOT_FOUND |
+| DOCX rendering failure | 500 | TEMPLATE_ERROR |
 
 ## Acceptance Criteria
 
-- [ ] Returns DOCX with correct Content-Type header
-- [ ] Sets Content-Disposition with dynamic filename from candidate name
+- [ ] Returns Content-Type `application/vnd.openxmlformats-officedocument.wordprocessingml.document`
+- [ ] Sets Content-Disposition with filename derived from candidate first and last name in lowercase kebab format
 - [ ] Generated DOCX preserves Perficient logo in header
 - [ ] Generated DOCX preserves "Proprietary and Confidential" footer
-- [ ] Generated DOCX uses correct paragraph styles (Heading1, 05Header3, 09BodyCopy, etc.)
-- [ ] Bullet lists render correctly with ListParagraph style
+- [ ] Professional Overview section renders the adapted summary
+- [ ] Roles list renders as individual items from `adapted_resume.roles`
+- [ ] Solutions list renders from `adapted_resume.solutions`
+- [ ] Industries list renders from `adapted_resume.industries`
+- [ ] Technologies list renders from `adapted_resume.technologies`
+- [ ] Key Engagements render with company, role, and description per entry
+- [ ] Education renders with institution, degree, and year per entry
+- [ ] Certifications render as individual items
+- [ ] Each experience entry renders client, role, period, project description, responsibilities, and business value
 - [ ] Multiple experience entries render as repeating sections
-- [ ] Returns 404 if no adaptation exists
-- [ ] DOCX is valid and opens without errors in Microsoft Word
-- [ ] DOCX is editable by the user after download
+- [ ] Returns 404 with error code ADAPTATION_NOT_FOUND if no adaptation exists
+- [ ] Returns 500 with error code TEMPLATE_NOT_FOUND if template is missing
+- [ ] Returns 500 with error code TEMPLATE_ERROR if rendering fails
+- [ ] Generated DOCX is valid and opens without errors in Microsoft Word
+- [ ] Generated DOCX is editable by the user after download

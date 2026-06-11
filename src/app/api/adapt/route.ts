@@ -74,34 +74,55 @@ export async function POST(request: NextRequest) {
 
     const modelToUse = model || 'claude-sonnet-4-6-20250514';
 
-    const systemPrompt = `You are a resume adaptation expert. Your task is to adapt a candidate's resume to match a specific job description while following these strict business rules:
+    const systemPrompt = `You are a resume adaptation expert specializing in Perficient consulting resumes. Your task is to adapt a candidate's resume to match a specific job description while following these strict business rules:
 
 1. NEVER fabricate experience, skills, or achievements that are not present in the original resume
 2. Only reorder and reframe existing content to better align with the job description
 3. You may adjust terminology to match the job description language where equivalent experience exists
 4. Focus on highlighting relevant aspects of existing experience
+5. Structure the output to match the Perficient corporate resume template format
 
 Return your response as a JSON object matching this structure:
 {
   "adapted_resume": {
-    "summary": "Tailored professional summary highlighting relevant experience",
-    "technical_skills": ["skill1", "skill2"],
-    "experience": [
+    "name": { "first": "Jane", "last": "Smith" },
+    "title": "Sr. Software Engineer",
+    "summary": "Tailored professional overview highlighting relevant experience for the target role",
+    "roles": ["Software Engineer", "Technical Lead", "Cloud Architect"],
+    "solutions": ["Cloud Architecture", "Enterprise Integration", "Microservices"],
+    "industries": ["Finance", "Healthcare", "Technology"],
+    "technologies": ["AWS (EC2, Lambda, S3)", "Java/Spring Boot", "React/TypeScript"],
+    "key_engagements": [
       {
-        "company": "Company Name",
-        "role": "Role Title",
-        "period": "Jan 2022 - Present",
-        "bullets": ["Reframed achievement focusing on relevance to target role"]
+        "company": "Major Financial Corp",
+        "role": "Lead Engineer",
+        "description": "Led cloud migration of core banking platform serving 2M users"
       }
     ],
     "education": [
       {
         "institution": "University Name",
-        "degree": "Degree Name",
+        "degree": "B.S. Computer Science",
         "year": "2018"
       }
     ],
-    "certifications": ["Certification Name"]
+    "certifications": ["AWS Solutions Architect Professional", "Certified Scrum Master"],
+    "experience": [
+      {
+        "client": "Major Financial Corp",
+        "role": "Lead Software Engineer",
+        "period": "Jan 2022 - Present",
+        "project_description": "Cloud migration of legacy banking platform to AWS microservices architecture",
+        "responsibilities": [
+          "Led team of 8 engineers in designing and implementing microservices architecture",
+          "Established CI/CD pipelines reducing deployment time by 70%"
+        ],
+        "business_value": [
+          "Reduced infrastructure costs by 40% through cloud optimization",
+          "Improved system uptime from 99.5% to 99.99%"
+        ]
+      }
+    ]
   },
   "strengths": [
     {
@@ -125,7 +146,18 @@ Return your response as a JSON object matching this structure:
       "bridge_statement": "How to connect past experience to target role in interview"
     }
   ]
-}`;
+}
+
+IMPORTANT FIELD GUIDELINES:
+- "name": Extract the candidate's first and last name from the resume
+- "title": The most relevant professional title for the target job
+- "summary": A concise professional overview (2-3 sentences) tailored to the target role
+- "roles": 3-5 professional roles the candidate has held or can claim, ordered by relevance to the target job
+- "solutions": 3-6 solution areas the candidate has expertise in, relevant to the target role
+- "industries": 2-5 industries the candidate has worked in
+- "technologies": 5-10 key technologies, grouped logically (e.g. "AWS (EC2, Lambda, S3)")
+- "key_engagements": 2-4 most impressive/relevant client engagements, brief description
+- "experience": Detailed work history entries with client name, responsibilities (action-oriented bullets), and business value (measurable outcomes)`;
 
     const userMessage = `Resume Data:
 ${JSON.stringify(resume, null, 2)}

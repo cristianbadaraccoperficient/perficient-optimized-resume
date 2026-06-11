@@ -24,7 +24,7 @@ Trigger AI-powered resume adaptation against a job description. Returns adapted 
 
 ## Preconditions
 
-- Resume must exist in storage (checked via `data/resume.json`)
+- Resume must exist in storage
 
 ## Response (200)
 
@@ -33,30 +33,53 @@ Trigger AI-powered resume adaptation against a job description. Returns adapted 
   "success": true,
   "data": {
     "adapted_resume": {
-      "summary": "Tailored professional summary...",
-      "technical_skills": ["Skill 1", "Skill 2"],
-      "experience": [
+      "name": {
+        "first": "Jane",
+        "last": "Smith"
+      },
+      "title": "Sr. Software Engineer",
+      "summary": "For over 10 years, Ms. Smith has led teams doing analysis, design, development, implementations and testing of enterprise applications in cloud architecture and distributed systems.",
+      "roles": ["Software Engineer", "Technical Lead", "Solutions Architect"],
+      "solutions": ["Cloud Architecture", "Enterprise Integration", "Custom Web Applications"],
+      "industries": ["Finance", "Healthcare", "Technology"],
+      "technologies": ["AWS (EC2, Lambda, S3)", "Java/Spring Boot", "React/Next.js", "PostgreSQL"],
+      "key_engagements": [
         {
-          "company": "Company Name",
-          "role": "Role Title",
-          "period": "Jan 2022 - Present",
-          "bullets": ["Achievement reframed for target role..."]
+          "company": "Large Financial Services Company",
+          "role": "Technical Lead",
+          "description": "Led architecture and development of a real-time payment processing platform."
         }
       ],
       "education": [
         {
-          "institution": "University",
-          "degree": "BS Computer Science",
-          "year": "2018"
+          "institution": "University of Texas",
+          "degree": "MS Computer Science",
+          "year": "2014"
         }
       ],
-      "certifications": ["AWS Solutions Architect"]
+      "certifications": ["AWS Solutions Architect Professional", "Certified Scrum Master"],
+      "experience": [
+        {
+          "client": "Large Financial Services Company",
+          "role": "Technical Lead",
+          "period": "Jan 2022 - Present",
+          "project_description": "Led a 6-person team doing design, development and implementation of a real-time payment processing platform utilizing AWS, Java/Spring Boot and Kafka.",
+          "responsibilities": [
+            "Architected event-driven microservices handling 10k transactions/second",
+            "Implemented CI/CD pipelines reducing deployment time from 2 hours to 15 minutes"
+          ],
+          "business_value": [
+            "After implementation, processing latency reduced by 85%",
+            "Annual cost savings of $2.1M through infrastructure optimization"
+          ]
+        }
+      ]
     },
     "strengths": [
       {
         "area": "Cloud Architecture",
         "evidence": "5 years AWS experience, led migration of 3 enterprise apps",
-        "talking_point": "STAR-formatted talking point..."
+        "talking_point": "In my current role, I led a team of 6 engineers to architect an event-driven payment platform on AWS, reducing processing latency by 85%."
       }
     ],
     "gaps": [
@@ -69,9 +92,9 @@ Trigger AI-powered resume adaptation against a job description. Returns adapted 
     "transferable_skills": [
       {
         "skill": "Team Leadership",
-        "source_experience": "Led 4-person team in current role",
-        "relevance_to_role": "JD requires managing cross-functional teams",
-        "bridge_statement": "Bridge statement connecting past to target role..."
+        "source_experience": "Led 6-person team in current role",
+        "relevance_to_role": "Job description requires managing cross-functional teams of 10+",
+        "bridge_statement": "While my team was smaller, I coordinated across 3 departments which mirrors the cross-functional aspect of this role"
       }
     ]
   },
@@ -97,7 +120,7 @@ Trigger AI-powered resume adaptation against a job description. Returns adapted 
 
 ## Side Effects
 
-- Stores last adaptation result at `data/last-adaptation.json`
+- Stores last adaptation result for later DOCX export
 
 ## Business Rules
 
@@ -108,10 +131,15 @@ Trigger AI-powered resume adaptation against a job description. Returns adapted 
 
 ## Acceptance Criteria
 
-- [ ] Validates JD minimum length
-- [ ] Returns 404 if no resume exists
-- [ ] AI response is validated against Zod schema before returning
-- [ ] Handles AI timeout with clear error message
-- [ ] Respects rate limit of 10 requests/minute
-- [ ] Stores adaptation result for DOCX generation
-- [ ] Never includes fabricated experience
+- [ ] Returns 400 with error code MISSING_JD when job_description is absent
+- [ ] Returns 400 with error code JD_TOO_SHORT when job_description is under 50 characters
+- [ ] Returns 404 with error code RESUME_NOT_FOUND if no resume exists
+- [ ] Returns adapted_resume with name, title, summary, roles, solutions, industries, technologies, key_engagements, education, certifications, and experience fields
+- [ ] Each experience entry includes client, role, period, project_description, responsibilities, and business_value
+- [ ] AI response is validated against schema before returning
+- [ ] Returns 500 with error code AI_PROCESSING_ERROR on AI timeout
+- [ ] Returns 500 with error code AI_RESPONSE_INVALID on malformed AI response
+- [ ] Returns 429 with error code RATE_LIMITED when rate limit is exceeded
+- [ ] Stores adaptation result for later DOCX generation
+- [ ] Never includes fabricated experience not present in original resume
+- [ ] Adjusts terminology to match job description language where equivalent experience exists

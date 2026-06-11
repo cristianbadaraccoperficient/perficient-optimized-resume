@@ -5,11 +5,15 @@ export const AdaptRequestSchema = z.object({
   model: z.string().optional(),
 });
 
-const ExperienceItemSchema = z.object({
+const NameSchema = z.object({
+  first: z.string(),
+  last: z.string(),
+});
+
+const KeyEngagementSchema = z.object({
   company: z.string(),
   role: z.string(),
-  period: z.string(),
-  bullets: z.array(z.string()),
+  description: z.string(),
 });
 
 const EducationItemSchema = z.object({
@@ -18,12 +22,27 @@ const EducationItemSchema = z.object({
   year: z.string(),
 });
 
+const ExperienceItemSchema = z.object({
+  client: z.string(),
+  role: z.string(),
+  period: z.string(),
+  project_description: z.string(),
+  responsibilities: z.array(z.string()),
+  business_value: z.array(z.string()),
+});
+
 export const AdaptedResumeSchema = z.object({
+  name: NameSchema,
+  title: z.string(),
   summary: z.string(),
-  technical_skills: z.array(z.string()),
-  experience: z.array(ExperienceItemSchema),
+  roles: z.array(z.string()),
+  solutions: z.array(z.string()),
+  industries: z.array(z.string()),
+  technologies: z.array(z.string()),
+  key_engagements: z.array(KeyEngagementSchema),
   education: z.array(EducationItemSchema),
   certifications: z.array(z.string()),
+  experience: z.array(ExperienceItemSchema),
 });
 
 export const StrengthSchema = z.object({
