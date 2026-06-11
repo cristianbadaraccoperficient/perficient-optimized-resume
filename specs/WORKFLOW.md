@@ -43,9 +43,9 @@ Tasks are tracked inline. Each spec's acceptance criteria serve as the task chec
 
 | Task | Spec | State |
 |------|------|-------|
-| Project init (Next.js 15, TS, Tailwind) | N/A (boilerplate) | spec-pending |
-| Storage utility | contracts/resume.spec.md (side effects) | spec-pending |
-| Portkey client config | contracts/adapt.spec.md (dependency) | spec-pending |
+| Project init (Next.js, TS, Tailwind) | N/A (boilerplate) | done |
+| Storage utility | contracts/resume.spec.md (side effects) | done |
+| Portkey client config | contracts/adapt.spec.md (dependency) | done |
 
 ### Phase 2: Resume & Explanation Management
 
@@ -78,11 +78,11 @@ Tasks are tracked inline. Each spec's acceptance criteria serve as the task chec
 
 ## Agent Roles
 
-| Agent | Reads | Writes | Decides |
-|-------|-------|--------|---------|
-| spec-author | docs/, existing specs | specs/[type]/[name].spec.md | What behavior to specify |
-| implementer | specs/, src/ | src/ code + tests | How to implement the spec |
-| reviewer | specs/ + src/ | review verdict | Whether code meets spec |
+| Agent | Model | Reads | Writes | Decides |
+|-------|-------|-------|--------|---------|
+| spec-author | opus | docs/, existing specs | specs/[type]/[name].spec.md | What behavior to specify |
+| implementer | sonnet | specs/, src/ | src/ code + tests | How to implement the spec |
+| reviewer | sonnet | specs/ + src/ | review verdict | Whether code meets spec |
 
 ## Conventions
 

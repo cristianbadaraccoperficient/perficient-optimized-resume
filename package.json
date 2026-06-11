@@ -1,0 +1,50 @@
+{
+  "name": "perficient-optimized-resume",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cristianbadaraccoperficient/perficient-optimized-resume.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/cristianbadaraccoperficient/perficient-optimized-resume/issues"
+  },
+  "homepage": "https://github.com/cristianbadaraccoperficient/perficient-optimized-resume#readme",
+  "dependencies": {
+    "docxtemplater": "^3.68.7",
+    "mammoth": "^1.12.0",
+    "next": "^16.2.9",
+    "pdf-parse": "^2.4.5",
+    "pizzip": "^3.2.0",
+    "portkey-ai": "^3.1.0",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.3.0",
+    "@types/node": "^25.9.3",
+    "@types/pdf-parse": "^1.1.5",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
+    "autoprefixer": "^10.5.0",
+    "eslint": "^9.39.4",
+    "eslint-config-next": "^16.2.9",
+    "postcss": "^8.5.15",
+    "tailwindcss": "^4.3.0",
+    "typescript": "^6.0.3"
+  }
+}
