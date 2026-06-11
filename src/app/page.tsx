@@ -1,11 +1,11 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import ResumeUpload from '@/components/ResumeUpload';
-import ExplanationInput from '@/components/ExplanationInput';
-import JobDescriptionInput from '@/components/JobDescriptionInput';
-import ResultsPanel from '@/components/ResultsPanel';
-import { AdaptationResult } from '@/contracts/adapt.contract';
+import { useState, useEffect } from "react";
+import ResumeUpload from "@/components/ResumeUpload";
+import ExplanationInput from "@/components/ExplanationInput";
+import JobDescriptionInput from "@/components/JobDescriptionInput";
+import ResultsPanel from "@/components/ResultsPanel";
+import { AdaptationResult } from "@/contracts/adapt.contract";
 
 interface ResumeData {
   filename: string;
@@ -14,34 +14,39 @@ interface ResumeData {
 }
 
 export default function Home() {
-  const [resumeStatus, setResumeStatus] = useState<'idle' | 'uploaded'>('idle');
+  const [resumeStatus, setResumeStatus] = useState<"idle" | "uploaded">("idle");
   const [resumeFilename, setResumeFilename] = useState<string | null>(null);
   const [resumeUploadedAt, setResumeUploadedAt] = useState<string | null>(null);
-  const [explanationStatus, setExplanationStatus] = useState<'idle' | 'saved'>('idle');
-  const [explanationContent, setExplanationContent] = useState<string | null>(null);
-  const [adaptationResult, setAdaptationResult] = useState<AdaptationResult | null>(null);
+  const [explanationStatus, setExplanationStatus] = useState<"idle" | "saved">(
+    "idle",
+  );
+  const [explanationContent, setExplanationContent] = useState<string | null>(
+    null,
+  );
+  const [jobDescription, setJobDescription] = useState<string>("");
+  const [adaptationResult, setAdaptationResult] =
+    useState<AdaptationResult | null>(null);
   const [isAdapting, setIsAdapting] = useState(false);
   const [adaptError, setAdaptError] = useState<string | null>(null);
-  const [lastJobDescription, setLastJobDescription] = useState<string>('');
 
   useEffect(() => {
     async function loadExisting() {
       try {
         const [resumeRes, explanationRes] = await Promise.all([
-          fetch('/api/resume'),
-          fetch('/api/explanation'),
+          fetch("/api/resume"),
+          fetch("/api/explanation"),
         ]);
 
         const resumeData = await resumeRes.json();
         if (resumeData.exists) {
-          setResumeStatus('uploaded');
+          setResumeStatus("uploaded");
           setResumeFilename(resumeData.original_filename);
           setResumeUploadedAt(resumeData.uploaded_at);
         }
 
         const explanationData = await explanationRes.json();
         if (explanationData.exists) {
-          setExplanationStatus('saved');
+          setExplanationStatus("saved");
           setExplanationContent(explanationData.content);
         }
       } catch {
@@ -53,112 +58,126 @@ export default function Home() {
   }, []);
 
   const handleUploadSuccess = (data: ResumeData) => {
-    setResumeStatus('uploaded');
+    setResumeStatus("uploaded");
     setResumeFilename(data.filename);
     setResumeUploadedAt(new Date().toISOString());
   };
 
-  const handleUploadError = () => {
-    // Error state handled within the component
-  };
-
   const handleSaveSuccess = () => {
-    setExplanationStatus('saved');
+    setExplanationStatus("saved");
   };
 
-  const handleSaveError = () => {
-    // Error state handled within the component
-  };
-
-  const handleAdapt = async (jobDescription: string) => {
+  const handleAdapt = async () => {
+    if (!jobDescription || jobDescription.length < 50) return;
     setIsAdapting(true);
     setAdaptError(null);
-    setLastJobDescription(jobDescription);
 
     try {
-      const response = await fetch('/api/adapt', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          job_description: jobDescription,
-        }),
+      const response = await fetch("/api/adapt", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ job_description: jobDescription }),
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        setAdaptError(data.error?.message || 'Failed to adapt resume');
+        setAdaptError(data.error?.message || "Failed to adapt resume");
         setAdaptationResult(null);
       } else {
         setAdaptationResult(data.data);
         setAdaptError(null);
       }
-    } catch (error) {
-      setAdaptError('Network error. Please try again.');
+    } catch {
+      setAdaptError("Network error. Please try again.");
       setAdaptationResult(null);
     } finally {
       setIsAdapting(false);
     }
   };
 
-  const handleRetry = () => {
-    if (lastJobDescription) {
-      handleAdapt(lastJobDescription);
-    }
-  };
+  const canTailor =
+    resumeStatus === "uploaded" && jobDescription.length >= 50 && !isAdapting;
 
   return (
-    <div className="min-h-screen p-8 max-w-3xl mx-auto">
-      <h1 className="text-3xl font-bold">Resume Optimizer</h1>
-      <p className="mt-2 text-gray-600">
-        Upload your resume and provide context to optimize it for specific job descriptions.
-      </p>
+    <div className="min-h-screen flex flex-col">
+      {/* Header */}
+      <header className="flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-[#f5f4f0]">
+        <div className="flex items-center gap-2">
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 18 18"
+            fill="none"
+            className="text-black"
+          >
+            <path d="M9 1L17 9L9 17L1 9L9 1Z" fill="currentColor" />
+          </svg>
+          <span className="font-bold tracking-widest text-sm uppercase">
+            Perficient CareerFit
+          </span>
+        </div>
+      </header>
 
-      <section className="mt-8">
-        <h2 className="text-xl font-semibold mb-3">1. Upload Resume</h2>
-        <ResumeUpload
-          onUploadSuccess={handleUploadSuccess}
-          onUploadError={handleUploadError}
-          currentStatus={resumeStatus}
-          currentFilename={resumeFilename}
-          uploadedAt={resumeUploadedAt}
-        />
-      </section>
+      {/* Main two-column layout */}
+      <div className="flex flex-1 overflow-hidden">
+        {/* Left column */}
+        <div className="w-1/2 flex flex-col gap-3 p-4 overflow-y-auto border-r border-gray-200">
+          <ResumeUpload
+            onUploadSuccess={handleUploadSuccess}
+            onUploadError={() => {}}
+            currentStatus={resumeStatus}
+            currentFilename={resumeFilename}
+            uploadedAt={resumeUploadedAt}
+          />
 
-      <section className="mt-8">
-        <h2 className="text-xl font-semibold mb-3">2. Explanation</h2>
-        <p className="text-sm text-gray-600 mb-3">
-          Provide additional background about your experience that isn't in your resume.
-        </p>
-        <ExplanationInput
-          onSaveSuccess={handleSaveSuccess}
-          onSaveError={handleSaveError}
-          currentStatus={explanationStatus}
-          initialContent={explanationContent}
-        />
-      </section>
+          <ExplanationInput
+            onSaveSuccess={handleSaveSuccess}
+            onSaveError={() => {}}
+            currentStatus={explanationStatus}
+            initialContent={explanationContent}
+          />
 
-      <section className="mt-8">
-        <h2 className="text-xl font-semibold mb-3">3. Job Description</h2>
-        <JobDescriptionInput
-          onAdapt={handleAdapt}
-          isLoading={isAdapting}
-          resumeExists={resumeStatus === 'uploaded'}
-          error={adaptError}
-        />
-      </section>
+          <JobDescriptionInput
+            value={jobDescription}
+            onChange={setJobDescription}
+            isLoading={isAdapting}
+            resumeExists={resumeStatus === "uploaded"}
+          />
 
-      <section className="mt-8">
-        <h2 className="text-xl font-semibold mb-3">4. Results</h2>
-        <ResultsPanel
-          adaptationResult={adaptationResult}
-          isLoading={isAdapting}
-          error={adaptError}
-          onRetry={handleRetry}
-        />
-      </section>
+          <button
+            onClick={handleAdapt}
+            disabled={!canTailor}
+            className={`w-full py-3 text-sm font-medium tracking-wide transition-colors rounded ${
+              canTailor
+                ? "bg-black text-white hover:bg-gray-800 cursor-pointer"
+                : "bg-gray-100 text-gray-400 cursor-not-allowed"
+            }`}
+          >
+            {isAdapting ? "Processing..." : "Tailor Resume →"}
+          </button>
+
+          {!canTailor && !isAdapting && (
+            <p className="text-xs text-gray-400 text-center -mt-1">
+              {resumeStatus !== "uploaded"
+                ? "Upload a resume and paste a job description (50+ characters) to continue."
+                : jobDescription.length < 50
+                  ? "Upload a resume and paste a job description (50+ characters) to continue."
+                  : ""}
+            </p>
+          )}
+        </div>
+
+        {/* Right column */}
+        <div className="w-1/2 flex flex-col overflow-hidden">
+          <ResultsPanel
+            adaptationResult={adaptationResult}
+            isLoading={isAdapting}
+            error={adaptError}
+            onRetry={handleAdapt}
+          />
+        </div>
+      </div>
     </div>
   );
 }

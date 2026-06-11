@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Resume Optimizer",
+  title: "Perficient CareerFit",
   description: "AI-powered resume optimization tool",
 };
 

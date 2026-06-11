@@ -30,9 +30,7 @@ export default function ResumeUpload({
     "idle" | "dragging" | "uploading" | "uploaded" | "error"
   >(currentStatus === "uploaded" ? "uploaded" : "idle");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [filename, setFilename] = useState<string | null>(
-    currentFilename || null,
-  );
+  const [filename, setFilename] = useState<string | null>(currentFilename || null);
   const [statusMessage, setStatusMessage] = useState<string>("");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -105,16 +103,12 @@ export default function ResumeUpload({
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
-    if (state !== "uploading") {
-      setState("dragging");
-    }
+    if (state !== "uploading") setState("dragging");
   };
 
   const handleDragLeave = (e: React.DragEvent) => {
     e.preventDefault();
-    if (state === "dragging") {
-      setState("idle");
-    }
+    if (state === "dragging") setState("idle");
   };
 
   const handleDrop = (e: React.DragEvent) => {
@@ -150,117 +144,90 @@ export default function ResumeUpload({
   };
 
   return (
-    <div className="w-full">
-      <div aria-live="polite" className="sr-only">
-        {statusMessage}
+    <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+      <div aria-live="polite" className="sr-only">{statusMessage}</div>
+
+      {/* Card header */}
+      <div className="px-4 pt-3 pb-2">
+        <span className="text-xs font-semibold tracking-widest uppercase text-gray-500">
+          (01) Source Document
+        </span>
       </div>
 
-      {state === "uploaded" ? (
-        <div className="border-2 border-green-300 bg-green-50 rounded-lg p-6 text-center">
-          <svg
-            className="mx-auto h-8 w-8 text-green-500 mb-2"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M5 13l4 4L19 7"
-            />
-          </svg>
-          <p className="text-sm font-medium text-green-800">{filename}</p>
-          {uploadedAt && (
-            <p className="text-xs text-green-600 mt-1">
-              Uploaded {new Date(uploadedAt).toLocaleDateString()}
-            </p>
-          )}
-          <button
-            onClick={handleReset}
-            className="mt-3 text-sm text-green-700 underline hover:text-green-900"
-          >
-            Re-upload
-          </button>
-        </div>
-      ) : state === "error" ? (
-        <div className="border-2 border-red-300 bg-red-50 rounded-lg p-6 text-center">
-          <p className="text-sm text-red-700" role="alert" id="upload-error">
-            {errorMessage}
-          </p>
-          <button
-            onClick={handleReset}
-            className="mt-3 text-sm text-red-700 underline hover:text-red-900"
-          >
-            Try again
-          </button>
-        </div>
-      ) : (
-        <div
-          role="button"
-          tabIndex={0}
-          aria-label="Upload resume file"
-          aria-describedby={errorMessage ? "upload-error" : undefined}
-          onDragOver={handleDragOver}
-          onDragLeave={handleDragLeave}
-          onDrop={handleDrop}
-          onClick={handleClick}
-          onKeyDown={handleKeyDown}
-          className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors ${
-            state === "dragging"
-              ? "border-blue-500 bg-blue-50"
-              : state === "uploading"
-                ? "border-gray-300 bg-gray-50 cursor-wait"
-                : "border-gray-300 hover:border-gray-400"
-          }`}
-        >
-          {state === "uploading" ? (
-            <>
-              <div className="animate-spin mx-auto h-8 w-8 border-2 border-blue-500 border-t-transparent rounded-full mb-2" />
-              <p className="text-sm text-gray-600">{filename}</p>
-            </>
-          ) : state === "dragging" ? (
-            <>
-              <svg
-                className="mx-auto h-10 w-10 text-blue-500 mb-2"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
-                />
-              </svg>
-              <p className="text-sm font-medium text-blue-600">
-                Drop file here
+      {/* Card body */}
+      <div className="px-4 pb-4">
+        {state === "uploaded" ? (
+          <div className="border border-gray-200 rounded p-4 text-center">
+            <svg className="mx-auto h-7 w-7 text-gray-700 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 13l4 4L19 7" />
+            </svg>
+            <p className="text-sm font-medium text-gray-800">{filename}</p>
+            {uploadedAt && (
+              <p className="text-xs text-gray-400 mt-1">
+                Uploaded {new Date(uploadedAt).toLocaleDateString()}
               </p>
-            </>
-          ) : (
-            <>
-              <svg
-                className="mx-auto h-10 w-10 text-gray-400 mb-2"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
-                />
-              </svg>
-              <p className="text-sm font-medium text-gray-700">Upload Resume</p>
-              <p className="text-xs text-gray-500 mt-1">
-                PDF, DOCX, or TXT (max 5MB)
-              </p>
-            </>
-          )}
-        </div>
-      )}
+            )}
+            <button
+              onClick={handleReset}
+              className="mt-3 text-xs text-gray-500 underline hover:text-gray-800"
+            >
+              Re-upload
+            </button>
+          </div>
+        ) : state === "error" ? (
+          <div className="border border-red-200 bg-red-50 rounded p-4 text-center">
+            <p className="text-sm text-red-700" role="alert">{errorMessage}</p>
+            <button
+              onClick={handleReset}
+              className="mt-3 text-xs text-red-600 underline hover:text-red-800"
+            >
+              Try again
+            </button>
+          </div>
+        ) : (
+          <div
+            role="button"
+            tabIndex={0}
+            aria-label="Upload resume file"
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+            onClick={handleClick}
+            onKeyDown={handleKeyDown}
+            className={`border-2 border-dashed rounded p-6 text-center cursor-pointer transition-colors ${
+              state === "dragging"
+                ? "border-gray-500 bg-gray-50"
+                : state === "uploading"
+                  ? "border-gray-200 bg-gray-50 cursor-wait"
+                  : "border-gray-200 hover:border-gray-400"
+            }`}
+          >
+            {state === "uploading" ? (
+              <>
+                <div className="animate-spin mx-auto h-7 w-7 border-2 border-gray-800 border-t-transparent rounded-full mb-2" />
+                <p className="text-xs text-gray-500">{filename}</p>
+              </>
+            ) : (
+              <>
+                {/* Document icon */}
+                <svg className="mx-auto h-8 w-8 text-gray-300 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                  />
+                </svg>
+                <p className="text-sm font-medium text-gray-700 mb-1">Drop your resume here</p>
+                <p className="text-xs text-gray-400 mb-3">.pdf, .docx, or .txt — up to 5 MB</p>
+                <button
+                  onClick={(e) => { e.stopPropagation(); handleClick(); }}
+                  className="px-4 py-1.5 bg-black text-white text-xs font-medium rounded hover:bg-gray-800 transition-colors"
+                >
+                  Choose file
+                </button>
+              </>
+            )}
+          </div>
+        )}
+      </div>
 
       <input
         ref={fileInputRef}

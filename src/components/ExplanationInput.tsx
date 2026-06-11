@@ -24,9 +24,7 @@ export default function ExplanationInput({
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
-    if (initialContent) {
-      setContent(initialContent);
-    }
+    if (initialContent) setContent(initialContent);
   }, [initialContent]);
 
   useEffect(() => {
@@ -70,86 +68,78 @@ export default function ExplanationInput({
     }
   };
 
-  const handleEdit = () => {
-    setState('editing');
-  };
-
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setContent(e.target.value);
-    if (state !== 'editing') {
-      setState('editing');
-    }
+    if (state !== 'editing') setState('editing');
   };
 
   const canSave = content.trim().length > 0 && content.length <= MAX_LENGTH && state !== 'saving';
 
   return (
-    <div className="w-full">
-      <div className="relative">
+    <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+      {/* Card header */}
+      <div className="flex items-center justify-between px-4 pt-3 pb-2">
+        <span className="text-xs font-semibold tracking-widest uppercase text-gray-500">
+          (02) Strategic Context
+        </span>
+        <span className={`text-xs ${content.length > MAX_LENGTH ? 'text-red-500' : 'text-gray-400'}`}>
+          {content.length} / {MAX_LENGTH.toLocaleString()}
+        </span>
+      </div>
+
+      {/* Textarea */}
+      <div className="px-4 pb-3">
         <textarea
-          aria-label="Explanation"
+          aria-label="Strategic context"
           value={content}
           onChange={handleChange}
           disabled={state === 'saving'}
           readOnly={state === 'saved'}
-          placeholder="Provide additional background about your experience, career goals, or context that will help optimize your resume..."
-          className={`w-full min-h-[160px] p-3 border rounded-lg resize-y text-sm ${
+          placeholder="What makes you the right fit that isn't on your resume?"
+          className={`w-full min-h-[120px] p-2 border border-gray-200 rounded text-sm resize-y focus:outline-none focus:border-gray-400 ${
             state === 'saving' || state === 'saved'
               ? 'bg-gray-50 text-gray-600'
               : 'bg-white text-gray-900'
-          } ${errorMessage ? 'border-red-300' : 'border-gray-300'}`}
+          } ${errorMessage ? 'border-red-300' : ''}`}
         />
-
-        <div className="flex items-center justify-between mt-2">
-          <span
-            aria-live="polite"
-            className={`text-xs ${content.length > MAX_LENGTH ? 'text-red-600' : 'text-gray-500'}`}
-          >
-            {content.length}/{MAX_LENGTH}
-          </span>
-
-          <div className="flex items-center gap-2">
-            {state === 'saved' && (
-              <span className="text-xs text-green-600">Saved</span>
-            )}
-
-            {state === 'saved' ? (
-              <button
-                onClick={handleEdit}
-                className="px-3 py-1.5 text-sm bg-gray-100 text-gray-700 rounded hover:bg-gray-200"
-              >
-                Edit
-              </button>
-            ) : state === 'error' ? (
-              <button
-                onClick={handleSave}
-                className="px-3 py-1.5 text-sm bg-red-600 text-white rounded hover:bg-red-700"
-              >
-                Retry
-              </button>
-            ) : (
-              <button
-                onClick={handleSave}
-                disabled={!canSave}
-                aria-disabled={!canSave}
-                className={`px-3 py-1.5 text-sm rounded ${
-                  canSave
-                    ? 'bg-blue-600 text-white hover:bg-blue-700'
-                    : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                }`}
-              >
-                {state === 'saving' ? 'Saving...' : 'Save'}
-              </button>
-            )}
-          </div>
-        </div>
       </div>
 
-      {errorMessage && (
-        <p role="alert" className="mt-2 text-sm text-red-600">
-          {errorMessage}
-        </p>
-      )}
+      {/* Footer row */}
+      <div className="flex items-center justify-end px-4 pb-3 gap-3">
+        {state === 'saved' && (
+          <span className="text-xs text-gray-400">Saved</span>
+        )}
+        {errorMessage && (
+          <span role="alert" className="text-xs text-red-500">{errorMessage}</span>
+        )}
+        {state === 'saved' ? (
+          <button
+            onClick={() => setState('editing')}
+            className="text-xs text-gray-500 hover:text-gray-800 underline"
+          >
+            Edit
+          </button>
+        ) : state === 'error' ? (
+          <button
+            onClick={handleSave}
+            className="text-xs text-red-600 hover:text-red-800 underline"
+          >
+            Retry
+          </button>
+        ) : (
+          <button
+            onClick={handleSave}
+            disabled={!canSave}
+            className={`text-xs px-3 py-1 rounded border transition-colors ${
+              canSave
+                ? 'border-gray-400 text-gray-700 hover:bg-gray-100'
+                : 'border-gray-200 text-gray-300 cursor-not-allowed'
+            }`}
+          >
+            {state === 'saving' ? 'Saving...' : 'Save'}
+          </button>
+        )}
+      </div>
     </div>
   );
 }
