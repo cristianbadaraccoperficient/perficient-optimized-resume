@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Allows user to provide or edit their explanation/context document that gives additional background about their experience.
+Allows user to provide or edit their explanation that gives additional background about their experience.
 
 ## Props
 
@@ -37,7 +37,7 @@ Allows user to provide or edit their explanation/context document that gives add
 
 ## Accessibility
 
-- Textarea: aria-label="Explanation document"
+- Textarea: aria-label="Explanation"
 - Character counter: aria-live="polite"
 - Save button: aria-disabled when conditions not met
 - Error message: role="alert"

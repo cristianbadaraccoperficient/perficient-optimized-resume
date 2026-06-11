@@ -28,61 +28,61 @@ Tasks are tracked inline. Each spec's acceptance criteria serve as the task chec
 
 ### Task States
 
-| State | Meaning |
-|-------|---------|
+| State          | Meaning                                  |
+| -------------- | ---------------------------------------- |
 | `spec-pending` | Feature identified, spec not yet written |
-| `spec-ready` | Spec written and approved by user |
-| `in-progress` | Implementation underway |
-| `in-review` | Implementation complete, under review |
-| `rejected` | Review failed, needs rework |
-| `done` | Review passed, feature complete |
+| `spec-ready`   | Spec written and approved by user        |
+| `in-progress`  | Implementation underway                  |
+| `in-review`    | Implementation complete, under review    |
+| `rejected`     | Review failed, needs rework              |
+| `done`         | Review passed, feature complete          |
 
 ## Task Board
 
 ### Phase 1: Setup & Infrastructure
 
-| Task | Spec | State |
-|------|------|-------|
-| Project init (Next.js, TS, Tailwind) | N/A (boilerplate) | done |
-| Storage utility | contracts/resume.spec.md (side effects) | done |
-| Portkey client config | contracts/adapt.spec.md (dependency) | done |
+| Task                                 | Spec                                    | State |
+| ------------------------------------ | --------------------------------------- | ----- |
+| Project init (Next.js, TS, Tailwind) | N/A (boilerplate)                       | done  |
+| Storage utility                      | contracts/resume.spec.md (side effects) | done  |
+| Portkey client config                | contracts/adapt.spec.md (dependency)    | done  |
 
 ### Phase 2: Resume & Explanation Management
 
-| Task | Spec | State |
-|------|------|-------|
-| POST /api/resume | contracts/resume.spec.md | spec-ready |
-| GET /api/resume | contracts/resume.spec.md | spec-ready |
-| POST /api/explanation | contracts/explanation.spec.md | spec-ready |
-| GET /api/explanation | contracts/explanation.spec.md | spec-ready |
-| ResumeUpload component | components/resume-upload.spec.md | spec-ready |
-| ExplanationInput component | components/explanation-input.spec.md | spec-ready |
-| Upload Resume flow | flows/upload-resume.spec.md | spec-ready |
+| Task                       | Spec                                 | State |
+| -------------------------- | ------------------------------------ | ----- |
+| POST /api/resume           | contracts/resume.spec.md             | done  |
+| GET /api/resume            | contracts/resume.spec.md             | done  |
+| POST /api/explanation      | contracts/explanation.spec.md        | done  |
+| GET /api/explanation       | contracts/explanation.spec.md        | done  |
+| ResumeUpload component     | components/resume-upload.spec.md     | done  |
+| ExplanationInput component | components/explanation-input.spec.md | done  |
+| Upload Resume flow         | flows/upload-resume.spec.md          | done  |
 
 ### Phase 3: AI Adaptation
 
-| Task | Spec | State |
-|------|------|-------|
-| POST /api/adapt | contracts/adapt.spec.md | spec-ready |
-| JobDescriptionInput component | components/job-description-input.spec.md | spec-ready |
-| ResultsPanel component | components/results-panel.spec.md | spec-ready |
-| Adapt Resume flow | flows/adapt-resume.spec.md | spec-ready |
+| Task                          | Spec                                     | State |
+| ----------------------------- | ---------------------------------------- | ----- |
+| POST /api/adapt               | contracts/adapt.spec.md                  | done  |
+| JobDescriptionInput component | components/job-description-input.spec.md | done  |
+| ResultsPanel component        | components/results-panel.spec.md         | done  |
+| Adapt Resume flow             | flows/adapt-resume.spec.md               | done  |
 
 ### Phase 4: DOCX Generation
 
-| Task | Spec | State |
-|------|------|-------|
-| GET /api/export | contracts/export.spec.md | spec-ready |
+| Task                                       | Spec                                        | State      |
+| ------------------------------------------ | ------------------------------------------- | ---------- |
+| GET /api/export                            | contracts/export.spec.md                    | spec-ready |
 | Perficient DOCX template with placeholders | contracts/export.spec.md (template mapping) | spec-ready |
-| Download Resume flow | flows/download-resume.spec.md | spec-ready |
+| Download Resume flow                       | flows/download-resume.spec.md               | spec-ready |
 
 ## Agent Roles
 
-| Agent | Model | Reads | Writes | Decides |
-|-------|-------|-------|--------|---------|
-| spec-author | opus | docs/, existing specs | specs/[type]/[name].spec.md | What behavior to specify |
-| implementer | sonnet | specs/, src/ | src/ code + tests | How to implement the spec |
-| reviewer | sonnet | specs/ + src/ | review verdict | Whether code meets spec |
+| Agent       | Model      | Reads                 | Writes                      | Decides                   |
+| ----------- | ---------- | --------------------- | --------------------------- | ------------------------- |
+| spec-author | sonnet 4.6 | docs/, existing specs | specs/[type]/[name].spec.md | What behavior to specify  |
+| implementer | sonnet 4.6 | specs/, src/          | src/ code + tests           | How to implement the spec |
+| reviewer    | sonnet 4.6 | specs/ + src/         | review verdict              | Whether code meets spec   |
 
 ## Conventions
 

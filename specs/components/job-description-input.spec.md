@@ -11,21 +11,24 @@ Text area where user pastes a job description to trigger resume adaptation.
 | onAdapt | (jd: string) => void | yes | - |
 | isLoading | boolean | yes | - |
 | resumeExists | boolean | yes | - |
+| error | string \| null | no | null |
 
 ## States
 
 | State | Trigger | Renders |
 |-------|---------|---------|
 | disabled | resumeExists=false | Textarea (disabled) + message "Upload resume first" |
-| empty | resumeExists=true, no text | Textarea + "Adapt Resume" button (disabled) |
+| idle | resumeExists=true, no text | Textarea + "Adapt Resume" button (disabled) |
 | ready | text entered (>=50 chars) | Textarea + "Adapt Resume" button (enabled) |
 | processing | isLoading=true | Textarea (disabled) + button with spinner |
+| error | adaptation failed | Textarea (enabled) + error message + "Try again" button |
 
 ## Interactions
 
 - Paste/type text -> enable button when >=50 chars
 - Click "Adapt Resume" -> calls onAdapt with textarea content
 - Clear textarea -> disable button
+- Click "Try again" (error state) -> re-submit with current content
 
 ## Validation (client-side)
 
@@ -48,3 +51,5 @@ Text area where user pastes a job description to trigger resume adaptation.
 - [ ] Button shows loading spinner during processing
 - [ ] Textarea disabled during processing (prevents edit)
 - [ ] Calls onAdapt with full text content on submit
+- [ ] Shows error message when error prop is set
+- [ ] "Try again" button re-submits current content

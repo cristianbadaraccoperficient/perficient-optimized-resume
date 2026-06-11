@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Store the user's explanation/context document that provides additional background about their experience.
+Store the user's explanation that provides additional background about their experience.
 
 ## Request
 
@@ -46,13 +46,13 @@ Store the user's explanation/context document that provides additional backgroun
 
 ## Side Effects
 
-- Stores explanation at `data/explanation.md`
+- Persists explanation content to storage
 
 ## Acceptance Criteria
 
 - [ ] Accepts plain text content
 - [ ] Validates content length limits
-- [ ] Persists to disk as markdown
+- [ ] Persists content to storage
 - [ ] Overwrites previous explanation on re-submit
 
 ---
@@ -61,7 +61,7 @@ Store the user's explanation/context document that provides additional backgroun
 
 ## Purpose
 
-Retrieve the currently stored explanation document.
+Retrieve the currently stored explanation.
 
 ## Request
 

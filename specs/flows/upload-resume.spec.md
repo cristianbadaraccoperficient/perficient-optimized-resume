@@ -49,5 +49,5 @@ User uploads their base resume so it can be used for future adaptations.
 - [ ] Full flow works from drag-drop to uploaded state
 - [ ] Full flow works from file picker to uploaded state
 - [ ] Re-upload overwrites previous resume
-- [ ] JD input enables after successful upload
+- [ ] Job description input enables after successful upload
 - [ ] All error paths show actionable messages

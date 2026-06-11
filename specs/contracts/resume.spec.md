@@ -43,15 +43,15 @@ Upload and parse a resume file, storing it for future adaptations.
 
 ## Side Effects
 
-- Stores structured resume at `data/resume.json`
-- Stores raw text at `data/resume-raw.md`
+- Persists structured resume data to storage
+- Persists raw text content to storage
 
 ## Acceptance Criteria
 
 - [ ] Accepts PDF, DOCX, and TXT files
 - [ ] Rejects files over 5MB with clear error
 - [ ] Extracts text content correctly from each format
-- [ ] Persists both raw and structured versions to disk
+- [ ] Persists both raw and structured versions to storage
 - [ ] Overwrites previous resume on re-upload
 
 ---

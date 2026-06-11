@@ -14,7 +14,18 @@
       "Bash(awk '{print $NF}')",
       "Bash(grep -v \"^\\\\.$\")",
       "Bash(python -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\('Next.js:', d['dependencies'].get\\('next',''\\)\\); print\\('React:', d['dependencies'].get\\('react',''\\)\\); print\\('Deps:', ', '.join\\(sorted\\(d['dependencies'].keys\\(\\)\\)\\)\\)\")",
-      "Bash(python -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\('type:', d.get\\('type', 'NOT SET'\\)\\)\")"
+      "Bash(python -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\('type:', d.get\\('type', 'NOT SET'\\)\\)\")",
+      "Bash(npm run *)",
+      "Bash(curl *)",
+      "Bash(python3 -c \"print\\('a' * 50001\\)\")",
+      "Bash(perl -e 'print \"a\" x 50001')",
+      "Bash(node test-api.js)",
+      "Bash(node test-validation.js)",
+      "Bash(dd if=/dev/zero of=large.txt bs=1M count=6)",
+      "Bash(npx next *)",
+      "Bash(node -e \"const pkg = require\\('./node_modules/pdf-parse/package.json'\\); console.log\\(pkg.version\\)\")",
+      "Bash(node -e \"const pdfParse = require\\('pdf-parse'\\); console.log\\(typeof pdfParse, Object.keys\\(pdfParse\\)\\)\")",
+      "Bash(node -e \"import\\('pdf-parse'\\).then\\(m => { const p = new m.PDFParse\\({ data: Buffer.from\\('test'\\) }\\); console.log\\(Object.getOwnPropertyNames\\(Object.getPrototypeOf\\(p\\)\\)\\) }\\)\")"
     ]
   }
 }

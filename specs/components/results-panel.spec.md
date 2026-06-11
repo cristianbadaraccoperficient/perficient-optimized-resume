@@ -10,14 +10,17 @@ Displays adaptation results with tabbed navigation: Strengths, Gaps, Transferabl
 |------|------|----------|---------|
 | adaptationResult | AdaptationResult \| null | yes | - |
 | isLoading | boolean | yes | - |
+| error | string \| null | no | null |
+| onRetry | () => void | no | - |
 
 ## States
 
 | State | Trigger | Renders |
 |-------|---------|---------|
-| empty | adaptationResult=null, isLoading=false | Placeholder message "Adapt a resume to see results" |
+| empty | adaptationResult=null, isLoading=false, no error | Placeholder message "Adapt a resume to see results" |
 | loading | isLoading=true | Skeleton loaders in tab content area |
 | results | adaptationResult provided | Tab bar + active tab content |
+| error | error prop is set | Error message + "Try again" button |
 
 ## Sub-components
 
@@ -59,6 +62,7 @@ Displays adaptation results with tabbed navigation: Strengths, Gaps, Transferabl
 
 - [ ] Shows placeholder when no results
 - [ ] Shows skeleton loaders during loading
+- [ ] Shows error message with "Try again" button when error is set
 - [ ] Renders all 3 tabs with correct content
 - [ ] Tab switching works via click and keyboard
 - [ ] "Download DOCX" button triggers file download

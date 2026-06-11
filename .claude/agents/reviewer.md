@@ -1,6 +1,8 @@
-# Reviewer Agent
+---
+model: claude-sonnet-4-6
+---
 
-model: sonnet
+# Reviewer Agent
 
 ## Role
 
