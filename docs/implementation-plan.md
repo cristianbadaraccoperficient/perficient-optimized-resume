@@ -1,0 +1,124 @@
+# Implementation Plan
+
+## Phase 1: Project Setup & Infrastructure
+
+### Step 1.1: Initialize Next.js Project
+- Create Next.js 15 app with TypeScript and App Router
+- Configure Tailwind CSS
+- Set up project structure (directories, configs)
+- Create `.gitignore` with data/ and .env.local
+
+### Step 1.2: Environment & Configuration
+- Create `.env.local.example` with required variables
+- Set up Portkey client configuration
+- Create storage utility (read/write JSON and markdown files)
+
+**Deliverable:** Running Next.js app with Portkey connected
+
+---
+
+## Phase 2: Resume & Explanation Management
+
+### Step 2.1: File Upload API
+- `POST /api/resume` — Accept PDF/DOCX/text, parse, store
+- `GET /api/resume` — Return stored resume data
+- `POST /api/explanation` — Store explanation text
+- `GET /api/explanation` — Return stored explanation
+
+### Step 2.2: Upload UI
+- File upload component with drag-and-drop
+- Status indicators (uploaded / not uploaded)
+- Preview of stored content
+- Re-upload functionality
+
+**Deliverable:** Can upload and persist resume + explanation
+
+---
+
+## Phase 3: AI Adaptation Pipeline
+
+### Step 3.1: Portkey Integration
+- Configure Portkey client with virtual key for Claude
+- Build prompt assembly function (system + user messages)
+- Handle structured JSON response parsing
+- Error handling and retries
+
+### Step 3.2: Adaptation API
+- `POST /api/adapt` — Receives JD, returns adaptation result
+- Validate resume exists before processing
+- Stream response for better UX (optional)
+- Store last adaptation result
+
+### Step 3.3: Adaptation UI
+- Job description text area
+- "Adapt Resume" button with loading state
+- Results panel with tabs:
+  - Strengths
+  - Gaps
+  - Transferable Skills
+
+**Deliverable:** End-to-end adaptation working, insights displayed
+
+---
+
+## Phase 4: PDF Generation
+
+### Step 4.1: Company Template
+- Convert company resume format to HTML/CSS template
+- Use Handlebars for dynamic content injection
+- Ensure template matches company standards exactly
+
+### Step 4.2: PDF Rendering
+- Set up Puppeteer for server-side HTML→PDF
+- `GET /api/pdf` — Generate and return PDF from last adaptation
+- Handle page breaks, margins, fonts
+
+### Step 4.3: PDF Preview & Download
+- In-browser PDF preview (iframe or react-pdf viewer)
+- Download button
+
+**Deliverable:** Full pipeline from JD input → adapted PDF download
+
+---
+
+## Phase 5: Polish & UX
+
+### Step 5.1: Loading States & Error Handling
+- Skeleton loaders during AI processing
+- Clear error messages for failures
+- Retry mechanisms
+
+### Step 5.2: Responsive Design
+- Mobile-friendly layout
+- Accessible components (keyboard nav, screen readers)
+
+### Step 5.3: Final Testing
+- Test with various JD formats
+- Validate PDF output matches company format
+- Performance optimization
+
+**Deliverable:** Production-ready application
+
+---
+
+## Estimated Timeline
+
+| Phase | Effort    | Description                    |
+|-------|-----------|--------------------------------|
+| 1     | ~1 hour   | Setup, configs, structure      |
+| 2     | ~2 hours  | Upload, parsing, persistence   |
+| 3     | ~3 hours  | AI integration, prompts, UI    |
+| 4     | ~2 hours  | PDF template and generation    |
+| 5     | ~1 hour   | Polish and testing             |
+| **Total** | **~9 hours** | Full V1 implementation    |
+
+---
+
+## Dependencies & Blockers
+
+| Item                     | Status    | Notes                                |
+|--------------------------|-----------|--------------------------------------|
+| Portkey API key          | Needed    | User must provide                    |
+| Anthropic API key        | Needed    | Configure as Portkey virtual key     |
+| Company resume template  | Pending   | User will provide example            |
+| Node.js 18.18+          | Required  | For Next.js 15                       |
