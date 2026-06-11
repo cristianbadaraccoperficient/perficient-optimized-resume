@@ -5,13 +5,13 @@ function getPortkeyInstance() {
     throw new Error('PORTKEY_API_KEY environment variable is required');
   }
 
-  if (!process.env.PORTKEY_VIRTUAL_KEY) {
-    throw new Error('PORTKEY_VIRTUAL_KEY environment variable is required');
+  if (!process.env.PORTKEY_BASE_URL) {
+    throw new Error('PORTKEY_BASE_URL environment variable is required');
   }
 
   return new Portkey({
     apiKey: process.env.PORTKEY_API_KEY,
-    virtualKey: process.env.PORTKEY_VIRTUAL_KEY,
+    baseURL: process.env.PORTKEY_BASE_URL,
   });
 }
 

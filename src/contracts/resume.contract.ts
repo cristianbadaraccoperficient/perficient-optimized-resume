@@ -20,6 +20,7 @@ export const ResumeUploadResponseSchema = z.object({
 export const ResumeGetResponseSchema = z.object({
   exists: z.literal(true),
   raw_text: z.string(),
+  formatted_md: z.string().optional(),
   structured: ResumeStructuredSchema,
   uploaded_at: z.string(),
   original_filename: z.string(),

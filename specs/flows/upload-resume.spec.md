@@ -31,9 +31,11 @@ User uploads their base resume so it can be used for future adaptations.
 3. Zone highlights, user drops file
 4. Client validates: PDF, under 5MB -> passes
 5. Upload indicator shows with "resume.pdf"
-6. API returns success with parsed sections
-7. Component shows "resume.pdf" with checkmark and "Re-upload" option
-8. Job description input becomes enabled
+6. API extracts raw text from file
+7. API converts raw text to structured Markdown via LLM (Haiku)
+8. API returns success with parsed sections
+9. Component shows "resume.pdf" with checkmark and "Re-upload" option
+10. Job description input becomes enabled
 
 ## Error Paths
 
@@ -41,8 +43,11 @@ User uploads their base resume so it can be used for future adaptations.
 |------|-----------------|-----------------|
 | 4 | Wrong file type (.jpg) | "Only PDF, DOCX, and TXT files are accepted" |
 | 4 | File too large (>5MB) | "File must be under 5MB" |
-| 7 | API 500 (parse error) | "Failed to parse resume. Try a different format." + retry |
-| 7 | Network error | "Connection failed. Check your network." + retry |
+| 6 | File corrupted/scanned | "Failed to extract text from PDF. The file may be corrupted, password-protected, or contain only scanned images." |
+| 6 | File has no readable text | "The file contains no readable text. If this is a scanned PDF, please use an OCR tool first." |
+| 7 | Portkey not configured | "AI formatting service is not configured." |
+| 7 | AI service unavailable | "Failed to format resume as markdown. The AI service may be temporarily unavailable." |
+| 8 | Network error | "Connection failed. Check your network." + retry |
 
 ## Acceptance Criteria
 

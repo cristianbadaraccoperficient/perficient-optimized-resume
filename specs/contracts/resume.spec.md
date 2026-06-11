@@ -39,20 +39,26 @@ Upload and parse a resume file, storing it for future adaptations.
 | No file provided | 400 | MISSING_FILE |
 | Unsupported format | 400 | UNSUPPORTED_FORMAT |
 | File too large (>5MB) | 400 | FILE_TOO_LARGE |
-| Parsing failure | 500 | PARSE_ERROR |
+| File extraction failure (corrupted/scanned) | 500 | PARSE_ERROR |
+| File has no readable text (<50 chars) | 400 | EMPTY_CONTENT |
+| Portkey env vars missing | 500 | PORTKEY_NOT_CONFIGURED |
+| AI returned empty response | 500 | FORMAT_EMPTY_RESPONSE |
+| AI service unavailable | 502 | FORMAT_ERROR |
 
 ## Side Effects
 
-- Persists structured resume data to storage
-- Persists raw text content to storage
+- Persists structured resume data to `resume.json` (includes `raw_text` and `formatted_md`)
+- Converts raw extracted text to structured Markdown via LLM (Haiku) and persists to `resume-raw.md`
 
 ## Acceptance Criteria
 
 - [ ] Accepts PDF, DOCX, and TXT files
 - [ ] Rejects files over 5MB with clear error
 - [ ] Extracts text content correctly from each format
-- [ ] Persists both raw and structured versions to storage
+- [ ] Converts raw text to structured Markdown via LLM (Haiku)
+- [ ] Persists raw text, formatted markdown, and structured data to storage
 - [ ] Overwrites previous resume on re-upload
+- [ ] Returns specific error messages for each failure mode
 
 ---
 
@@ -81,6 +87,7 @@ Retrieve the currently stored resume.
 {
   "exists": true,
   "raw_text": "Full text content...",
+  "formatted_md": "# Name\n\n## Professional Overview\n...",
   "structured": {
     "summary": "...",
     "experience": [],

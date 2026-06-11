@@ -6,7 +6,7 @@ User provides a job description and receives an AI-adapted resume with interview
 
 ## Preconditions
 
-- Resume is uploaded and stored
+- Resume is uploaded, parsed, and formatted as structured Markdown
 - Explanation is stored (optional but recommended)
 
 ## Steps

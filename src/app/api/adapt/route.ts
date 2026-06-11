@@ -72,7 +72,7 @@ export async function POST(request: NextRequest) {
 
     const explanation = await readMarkdown('explanation.md');
 
-    const modelToUse = model || 'claude-sonnet-4-6-20250514';
+    const modelToUse = model || '@dsvertex/anthropic.claude-sonnet-4-6@20250514';
 
     const systemPrompt = `You are a resume adaptation expert specializing in Perficient consulting resumes. Your task is to adapt a candidate's resume to match a specific job description while following these strict business rules:
 
@@ -159,8 +159,12 @@ IMPORTANT FIELD GUIDELINES:
 - "key_engagements": 2-4 most impressive/relevant client engagements, brief description
 - "experience": Detailed work history entries with client name, responsibilities (action-oriented bullets), and business value (measurable outcomes)`;
 
+    const resumeContent = (resume as { formatted_md?: string; raw_text?: string }).formatted_md
+      || (resume as { raw_text?: string }).raw_text
+      || JSON.stringify(resume, null, 2);
+
     const userMessage = `Resume Data:
-${JSON.stringify(resume, null, 2)}
+${resumeContent}
 
 ${explanation ? `Additional Context:\n${explanation}\n\n` : ''}Job Description:
 ${job_description}

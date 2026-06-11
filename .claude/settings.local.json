@@ -33,7 +33,10 @@
       "Bash(ls node_modules/docxtemplater/types)",
       "Bash(ls node_modules/docxtemplater/*.d.ts)",
       "Bash(node -e \"const d=require\\('fs'\\).readFileSync\\(0,'utf8'\\); const p=JSON.parse\\(d\\); console.log\\('types:', p.types\\); console.log\\('main:', p.main\\);\")",
-      "Bash(node -e \"const d=require\\('fs'\\).readFileSync\\(0,'utf8'\\); const p=JSON.parse\\(d\\); console.log\\('types:', p.types, 'typings:', p.typings, 'main:', p.main\\);\")"
+      "Bash(node -e \"const d=require\\('fs'\\).readFileSync\\(0,'utf8'\\); const p=JSON.parse\\(d\\); console.log\\('types:', p.types, 'typings:', p.typings, 'main:', p.main\\);\")",
+      "Bash(node -e \"const { PDFParse } = require\\('pdf-parse'\\); const fs = require\\('fs'\\); const buf = fs.readFileSync\\('./data/template-resume.pdf'\\); const p = new PDFParse\\({ data: new Uint8Array\\(buf\\) }\\); p.getText\\(\\).then\\(r => console.log\\('OK:', r.text.substring\\(0,100\\)\\)\\).catch\\(e => console.error\\('ERROR:', e.message\\)\\)\")",
+      "Bash(kill %1)",
+      "Bash(taskkill *)"
     ]
   }
 }
