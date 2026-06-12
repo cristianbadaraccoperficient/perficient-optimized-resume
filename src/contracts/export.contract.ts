@@ -1,11 +1,7 @@
 import { z } from 'zod';
-import { AdaptationResultSchema } from './adapt.contract';
+import { ResumeResultSchema } from './adapt.contract';
 
-/**
- * Schema for validating the stored adaptation result before export.
- * Reuses the AdaptationResultSchema from the adapt contract.
- */
-export const ExportAdaptationResultSchema = AdaptationResultSchema;
+export const ExportAdaptationResultSchema = ResumeResultSchema;
 
 export type ExportAdaptationResult = z.infer<typeof ExportAdaptationResultSchema>;
 

@@ -5,7 +5,7 @@ import ResumeUpload from "@/components/ResumeUpload";
 import ExplanationInput from "@/components/ExplanationInput";
 import JobDescriptionInput from "@/components/JobDescriptionInput";
 import ResultsPanel from "@/components/ResultsPanel";
-import { AdaptationResult } from "@/contracts/adapt.contract";
+import { InsightsResult, AdaptedResume } from "@/contracts/adapt.contract";
 
 interface ResumeData {
   filename: string;
@@ -25,10 +25,13 @@ export default function Home() {
   );
   const [explanationFormattedMd, setExplanationFormattedMd] = useState<string | null>(null);
   const [jobDescription, setJobDescription] = useState<string>("");
-  const [adaptationResult, setAdaptationResult] =
-    useState<AdaptationResult | null>(null);
-  const [isAdapting, setIsAdapting] = useState(false);
-  const [adaptError, setAdaptError] = useState<string | null>(null);
+  const [insightsResult, setInsightsResult] = useState<InsightsResult | null>(null);
+  const [resumeResult, setResumeResult] = useState<AdaptedResume | null>(null);
+  const [isLoadingInsights, setIsLoadingInsights] = useState(false);
+  const [isLoadingResume, setIsLoadingResume] = useState(false);
+  const [insightsError, setInsightsError] = useState<string | null>(null);
+  const [resumeError, setResumeError] = useState<string | null>(null);
+  const [progressMsg, setProgressMsg] = useState<string>("Processing...");
 
   useEffect(() => {
     async function loadExisting() {
@@ -59,6 +62,25 @@ export default function Home() {
     loadExisting();
   }, []);
 
+  const isAdapting = isLoadingInsights || isLoadingResume;
+
+  useEffect(() => {
+    if (!isAdapting) {
+      setProgressMsg("Processing...");
+      return;
+    }
+    const messages = jobDescription.length >= 50
+      ? ["Analyzing resume...", "Generating insights...", "Tailoring to role...", "Optimizing format...", "Almost done..."]
+      : ["Analyzing resume...", "Generating insights...", "Adapting to Perficient style...", "Almost done..."];
+    let index = 0;
+    setProgressMsg(messages[0]);
+    const interval = setInterval(() => {
+      index = (index + 1) % messages.length;
+      setProgressMsg(messages[index]);
+    }, 8000);
+    return () => clearInterval(interval);
+  }, [isAdapting, jobDescription]);
+
   const handleUploadSuccess = (data: ResumeData) => {
     setResumeStatus("uploaded");
     setResumeFilename(data.filename);
@@ -69,37 +91,45 @@ export default function Home() {
     setExplanationStatus("saved");
   };
 
-  const handleAdapt = async () => {
-    if (!jobDescription || jobDescription.length < 50) return;
-    setIsAdapting(true);
-    setAdaptError(null);
+  const handleAdapt = () => {
+    setIsLoadingInsights(true);
+    setIsLoadingResume(true);
+    setInsightsResult(null);
+    setResumeResult(null);
+    setInsightsError(null);
+    setResumeError(null);
 
-    try {
-      const response = await fetch("/api/adapt", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ job_description: jobDescription }),
-      });
+    const body = JSON.stringify({
+      ...(jobDescription.length >= 50 ? { job_description: jobDescription } : {}),
+    });
+    const headers = { "Content-Type": "application/json" };
 
-      const data = await response.json();
+    fetch("/api/adapt", { method: "POST", headers, body })
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.success) {
+          setInsightsResult(data.data);
+        } else {
+          setInsightsError(data.error?.message || "Failed to generate insights");
+        }
+      })
+      .catch(() => setInsightsError("Network error. Please try again."))
+      .finally(() => setIsLoadingInsights(false));
 
-      if (!response.ok) {
-        setAdaptError(data.error?.message || "Failed to adapt resume");
-        setAdaptationResult(null);
-      } else {
-        setAdaptationResult(data.data);
-        setAdaptError(null);
-      }
-    } catch {
-      setAdaptError("Network error. Please try again.");
-      setAdaptationResult(null);
-    } finally {
-      setIsAdapting(false);
-    }
+    fetch("/api/adapt/resume", { method: "POST", headers, body })
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.success) {
+          setResumeResult(data.data.adapted_resume);
+        } else {
+          setResumeError(data.error?.message || "Failed to generate resume");
+        }
+      })
+      .catch(() => setResumeError("Network error. Please try again."))
+      .finally(() => setIsLoadingResume(false));
   };
 
-  const canTailor =
-    resumeStatus === "uploaded" && jobDescription.length >= 50 && !isAdapting;
+  const canTailor = resumeStatus === "uploaded" && !isAdapting;
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -157,16 +187,12 @@ export default function Home() {
                 : "bg-gray-100 text-gray-400 cursor-not-allowed"
             }`}
           >
-            {isAdapting ? "Processing..." : "Tailor Resume →"}
+            {isAdapting ? progressMsg : "Tailor Resume →"}
           </button>
 
           {!canTailor && !isAdapting && (
             <p className="text-xs text-gray-400 text-center -mt-1">
-              {resumeStatus !== "uploaded"
-                ? "Upload a resume and paste a job description (50+ characters) to continue."
-                : jobDescription.length < 50
-                  ? "Upload a resume and paste a job description (50+ characters) to continue."
-                  : ""}
+              Upload your resume to continue.
             </p>
           )}
         </div>
@@ -174,9 +200,12 @@ export default function Home() {
         {/* Right column */}
         <div className="w-1/2 flex flex-col overflow-hidden">
           <ResultsPanel
-            adaptationResult={adaptationResult}
-            isLoading={isAdapting}
-            error={adaptError}
+            insightsResult={insightsResult}
+            resumeResult={resumeResult}
+            isLoadingInsights={isLoadingInsights}
+            isLoadingResume={isLoadingResume}
+            insightsError={insightsError}
+            resumeError={resumeError}
             onRetry={handleAdapt}
           />
         </div>

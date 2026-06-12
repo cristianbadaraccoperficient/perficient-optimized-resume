@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { AdaptRequestSchema, InsightsResultSchema } from '@/contracts/adapt.contract';
-import { readJSON, readMarkdown } from '@/lib/storage';
+import { AdaptRequestSchema, ResumeResultSchema } from '@/contracts/adapt.contract';
+import { readJSON, writeJSON, readMarkdown } from '@/lib/storage';
 import { portkey } from '@/lib/portkey';
 
 interface PortkeyErrorInfo {
@@ -95,38 +95,68 @@ export async function POST(request: NextRequest) {
 
     const modelToUse = model || '@dsvertex/anthropic.claude-sonnet-4-6';
 
-    const systemPrompt = `You are a career coaching expert specializing in Perficient consulting roles. Analyze the candidate's resume against the provided context and job description (if any) and return interview preparation insights.
+    const systemPrompt = `You are a resume adaptation expert specializing in Perficient consulting resumes. Your task is to reformat and optimize a candidate's resume to the Perficient corporate style, and when a job description is provided, tailor it to that specific role. Follow these strict business rules:
 
-NEVER fabricate experience not present in the resume. Base all analysis strictly on the provided resume content.
+1. NEVER fabricate experience, skills, or achievements that are not present in the original resume
+2. Only reorder and reframe existing content to better align with the target role (if provided)
+3. You may adjust terminology to match the job description language where equivalent experience exists
+4. Focus on highlighting relevant aspects of existing experience
+5. Structure the output to match the Perficient corporate resume template format
 
-Return a JSON object with this exact structure:
+Return your response as a JSON object with this exact structure:
 {
-  "strengths": [
-    {
-      "area": "Specific competency area",
-      "evidence": "Concrete evidence from the resume",
-      "talking_point": "STAR-formatted talking point for interviews"
-    }
-  ],
-  "gaps": [
-    {
-      "skill": "Missing or weak skill",
-      "severity": "critical or nice-to-have",
-      "mitigation": "How existing skills bridge this gap or what to study"
-    }
-  ],
-  "transferable_skills": [
-    {
-      "skill": "Skill name",
-      "source_experience": "Where this skill was demonstrated in the resume",
-      "relevance_to_role": "Why it matters for the target role",
-      "bridge_statement": "How to frame this in an interview"
-    }
-  ]
+  "adapted_resume": {
+    "name": { "first": "Jane", "last": "Smith" },
+    "title": "Sr. Software Engineer",
+    "summary": "Concise professional overview (2-3 sentences) tailored to the target role",
+    "roles": ["Software Engineer", "Technical Lead", "Cloud Architect"],
+    "solutions": ["Cloud Architecture", "Enterprise Integration", "Microservices"],
+    "industries": ["Finance", "Healthcare", "Technology"],
+    "technologies": ["AWS (EC2, Lambda, S3)", "Java/Spring Boot", "React/TypeScript"],
+    "key_engagements": [
+      {
+        "company": "Major Financial Corp",
+        "role": "Lead Engineer",
+        "description": "Led cloud migration of core banking platform serving 2M users"
+      }
+    ],
+    "education": [
+      {
+        "institution": "University Name",
+        "degree": "B.S. Computer Science",
+        "year": "2018"
+      }
+    ],
+    "certifications": ["AWS Solutions Architect Professional", "Certified Scrum Master"],
+    "experience": [
+      {
+        "client": "Major Financial Corp",
+        "role": "Lead Software Engineer",
+        "period": "Jan 2022 - Present",
+        "project_description": "Cloud migration of legacy banking platform to AWS microservices architecture",
+        "responsibilities": [
+          "Led team of 8 engineers in designing and implementing microservices architecture",
+          "Established CI/CD pipelines reducing deployment time by 70%"
+        ],
+        "business_value": [
+          "Reduced infrastructure costs by 40% through cloud optimization",
+          "Improved system uptime from 99.5% to 99.99%"
+        ]
+      }
+    ]
+  }
 }
 
-Keep responses concise: talking_points max 2 sentences, mitigation max 1 sentence, bridge_statement max 2 sentences.
-Return 3-5 strengths, all meaningful gaps (0 is valid), and 2-4 transferable skills.`;
+FIELD GUIDELINES:
+- "name": Extract first and last name from the resume
+- "title": Most relevant professional title for the target role
+- "summary": 2-3 sentences, tailored to the target role
+- "roles": 3-5 professional roles ordered by relevance
+- "solutions": 3-6 solution areas relevant to the target role
+- "industries": 2-5 industries the candidate has worked in
+- "technologies": 5-10 key technologies, grouped logically
+- "key_engagements": 2-4 most impressive/relevant client engagements
+- "experience": Full work history with action-oriented responsibilities and measurable business value`;
 
     const resumeContent = (resume as { formatted_md?: string; raw_text?: string }).formatted_md
       || (resume as { raw_text?: string }).raw_text
@@ -134,7 +164,7 @@ Return 3-5 strengths, all meaningful gaps (0 is valid), and 2-4 transferable ski
 
     const userMessage = `Resume Data:
 ${resumeContent}
-${explanation ? `\nAdditional Context:\n${explanation}\n` : ''}${job_description ? `\nJob Description:\n${job_description}\n\nPlease adapt the resume to this job description and provide interview insights.` : '\nPlease reformat and optimize this resume to the Perficient style and standards.'}`;
+${explanation ? `\nAdditional Context:\n${explanation}\n` : ''}${job_description ? `\nJob Description:\n${job_description}\n\nPlease adapt the resume to this job description following the Perficient format.` : '\nPlease reformat and optimize this resume to the Perficient style and standards.'}`;
 
     let aiResponse;
     try {
@@ -145,13 +175,13 @@ ${explanation ? `\nAdditional Context:\n${explanation}\n` : ''}${job_description
           { role: 'user', content: userMessage },
         ],
         response_format: { type: 'json_object' },
-        max_tokens: 4096,
+        max_tokens: 6144,
         timeout: 90000,
       });
     } catch (error: unknown) {
       const errorInfo = extractPortkeyError(error);
 
-      console.error('[adapt/insights POST] Portkey call failed:', JSON.stringify({
+      console.error('[adapt/resume POST] Portkey call failed:', JSON.stringify({
         type: errorInfo.type,
         status: errorInfo.status,
         message: errorInfo.message,
@@ -186,7 +216,7 @@ ${explanation ? `\nAdditional Context:\n${explanation}\n` : ''}${job_description
 
     const finishReason = aiResponse.choices[0]?.finish_reason;
     if (finishReason === 'length') {
-      console.error('[adapt/insights POST] AI response truncated by max_tokens limit');
+      console.error('[adapt/resume POST] AI response truncated by max_tokens limit');
       return NextResponse.json(
         {
           success: false,
@@ -213,14 +243,13 @@ ${explanation ? `\nAdditional Context:\n${explanation}\n` : ''}${job_description
       );
     }
 
-    // Strip markdown code fences if the model wraps JSON in ```json ... ```
     const responseContent = rawContent.replace(/^```(?:json)?\s*\n?/i, '').replace(/\n?```\s*$/i, '').trim();
 
     let parsedResponse;
     try {
       parsedResponse = JSON.parse(responseContent);
     } catch {
-      console.error('[adapt/insights POST] Invalid JSON from AI. First 500 chars:', responseContent.slice(0, 500));
+      console.error('[adapt/resume POST] Invalid JSON from AI. First 500 chars:', responseContent.slice(0, 500));
       return NextResponse.json(
         {
           success: false,
@@ -234,7 +263,7 @@ ${explanation ? `\nAdditional Context:\n${explanation}\n` : ''}${job_description
       );
     }
 
-    const validationResult = InsightsResultSchema.safeParse(parsedResponse);
+    const validationResult = ResumeResultSchema.safeParse(parsedResponse);
     if (!validationResult.success) {
       return NextResponse.json(
         {
@@ -247,6 +276,8 @@ ${explanation ? `\nAdditional Context:\n${explanation}\n` : ''}${job_description
         { status: 500 }
       );
     }
+
+    await writeJSON('last-adaptation.json', validationResult.data);
 
     const processingTime = Date.now() - startTime;
 
@@ -262,7 +293,7 @@ ${explanation ? `\nAdditional Context:\n${explanation}\n` : ''}${job_description
     });
 
   } catch (error) {
-    console.error('[adapt/insights POST] Unexpected error:', error instanceof Error ? error.stack : error);
+    console.error('[adapt/resume POST] Unexpected error:', error instanceof Error ? error.stack : error);
     return NextResponse.json(
       {
         success: false,

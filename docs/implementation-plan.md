@@ -44,14 +44,17 @@
 - Error handling and retries
 
 ### Step 3.2: Adaptation API
-- `POST /api/adapt` — Receives JD, returns adaptation result
+- `POST /api/adapt` — Optionally receives JD, always returns adapted resume
+  - Resume only → Perficient-style reformat
+  - Resume + strategic context → optimized with extra context
+  - Resume + JD (+ optional context) → fully tailored to the role
 - Validate resume exists before processing
 - Stream response for better UX (optional)
 - Store last adaptation result
 
 ### Step 3.3: Adaptation UI
-- Job description text area
-- "Adapt Resume" button with loading state
+- Job description text area (optional — does not gate the button)
+- "Tailor Resume" button enabled as soon as resume is uploaded
 - Results panel with tabs:
   - Strengths
   - Gaps

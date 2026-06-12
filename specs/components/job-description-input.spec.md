@@ -18,22 +18,19 @@ Text area where user pastes a job description to trigger resume adaptation.
 | State | Trigger | Renders |
 |-------|---------|---------|
 | disabled | resumeExists=false | Textarea (disabled) + message "Upload resume first" |
-| idle | resumeExists=true, no text | Textarea + "Adapt Resume" button (disabled) |
-| ready | text entered (>=50 chars) | Textarea + "Adapt Resume" button (enabled) |
-| processing | isLoading=true | Textarea (disabled) + button with spinner |
-| error | adaptation failed | Textarea (enabled) + error message + "Try again" button |
+| idle | resumeExists=true | Textarea (optional input, does not gate the Tailor button) |
+| processing | isLoading=true | Textarea (disabled) |
+| error | adaptation failed | Textarea (enabled) + error message |
 
 ## Interactions
 
-- Paste/type text -> enable button when >=50 chars
-- Click "Adapt Resume" -> calls onAdapt with textarea content
-- Clear textarea -> disable button
-- Click "Try again" (error state) -> re-submit with current content
+- Paste/type text in textarea → stored as job description, sent to API if ≥50 chars
+- Clear textarea → job description omitted from next request
 
 ## Validation (client-side)
 
-- Min 50 characters to enable submission
-- Show helper text: "Paste the full job description (minimum 50 characters)"
+- No minimum length required to submit; the "Tailor Resume" button is gated only on resume upload
+- Show helper text: "Optional — paste a job description to tailor the resume to a specific role (minimum 50 characters to be included)"
 - Show current char count when typing
 
 ## Accessibility
@@ -45,11 +42,7 @@ Text area where user pastes a job description to trigger resume adaptation.
 ## Acceptance Criteria
 
 - [ ] Textarea disabled when no resume exists with explanation message
-- [ ] Button disabled when text < 50 chars
-- [ ] Button enabled when text >= 50 chars
+- [ ] Textarea enabled as soon as resume exists (JD is optional)
 - [ ] Shows character count
-- [ ] Button shows loading spinner during processing
 - [ ] Textarea disabled during processing (prevents edit)
-- [ ] Calls onAdapt with full text content on submit
 - [ ] Shows error message when error prop is set
-- [ ] "Try again" button re-submits current content

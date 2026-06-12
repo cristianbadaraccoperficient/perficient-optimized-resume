@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 export const AdaptRequestSchema = z.object({
-  job_description: z.string().min(50).max(20000),
+  job_description: z.string().min(50).max(20000).optional(),
   model: z.string().optional(),
 });
 
@@ -64,6 +64,16 @@ export const TransferableSkillSchema = z.object({
   bridge_statement: z.string(),
 });
 
+export const InsightsResultSchema = z.object({
+  strengths: z.array(StrengthSchema),
+  gaps: z.array(GapSchema),
+  transferable_skills: z.array(TransferableSkillSchema),
+});
+
+export const ResumeResultSchema = z.object({
+  adapted_resume: AdaptedResumeSchema,
+});
+
 export const AdaptationResultSchema = z.object({
   adapted_resume: AdaptedResumeSchema,
   strengths: z.array(StrengthSchema),
@@ -87,5 +97,7 @@ export type AdaptedResume = z.infer<typeof AdaptedResumeSchema>;
 export type Strength = z.infer<typeof StrengthSchema>;
 export type Gap = z.infer<typeof GapSchema>;
 export type TransferableSkill = z.infer<typeof TransferableSkillSchema>;
+export type InsightsResult = z.infer<typeof InsightsResultSchema>;
+export type ResumeResult = z.infer<typeof ResumeResultSchema>;
 export type AdaptationResult = z.infer<typeof AdaptationResultSchema>;
 export type AdaptResponse = z.infer<typeof AdaptResponseSchema>;

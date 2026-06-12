@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Trigger AI-powered resume adaptation against a job description. Returns adapted resume plus interview insights.
+Trigger AI-powered resume optimization. With no job description, formats the resume to Perficient style. With a job description, fully tailors the resume to that role and returns interview insights.
 
 ## Request
 
@@ -19,7 +19,7 @@ Trigger AI-powered resume adaptation against a job description. Returns adapted 
 
 ## Validation
 
-- job_description: required, string, min 50 chars, max 20000 chars
+- job_description: **optional**, string, min 50 chars, max 20000 chars
 - model: optional, defaults to "claude-sonnet-4-6-20250514"
 
 ## Preconditions
@@ -111,8 +111,7 @@ Trigger AI-powered resume adaptation against a job description. Returns adapted 
 
 | Condition | Code | Error Code |
 |-----------|------|------------|
-| No JD provided | 400 | MISSING_JD |
-| JD too short (<50 chars) | 400 | JD_TOO_SHORT |
+| JD provided but invalid (e.g. wrong type) | 400 | VALIDATION_ERROR |
 | No resume stored | 404 | RESUME_NOT_FOUND |
 | AI timeout (>30s) | 500 | AI_PROCESSING_ERROR |
 | AI response invalid JSON | 500 | AI_RESPONSE_INVALID |
@@ -131,8 +130,8 @@ Trigger AI-powered resume adaptation against a job description. Returns adapted 
 
 ## Acceptance Criteria
 
-- [ ] Returns 400 with error code MISSING_JD when job_description is absent
-- [ ] Returns 400 with error code JD_TOO_SHORT when job_description is under 50 characters
+- [ ] Returns 200 when only resume exists and no job_description is provided (Perficient-style format)
+- [ ] Returns 200 with job-tailored output when job_description is provided (>=50 chars)
 - [ ] Returns 404 with error code RESUME_NOT_FOUND if no resume exists
 - [ ] Returns adapted_resume with name, title, summary, roles, solutions, industries, technologies, key_engagements, education, certifications, and experience fields
 - [ ] Each experience entry includes client, role, period, project_description, responsibilities, and business_value
