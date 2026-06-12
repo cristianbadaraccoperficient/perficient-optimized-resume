@@ -37,7 +37,11 @@
       "Bash(node -e \"const { PDFParse } = require\\('pdf-parse'\\); const fs = require\\('fs'\\); const buf = fs.readFileSync\\('./data/template-resume.pdf'\\); const p = new PDFParse\\({ data: new Uint8Array\\(buf\\) }\\); p.getText\\(\\).then\\(r => console.log\\('OK:', r.text.substring\\(0,100\\)\\)\\).catch\\(e => console.error\\('ERROR:', e.message\\)\\)\")",
       "Bash(kill %1)",
       "Bash(taskkill *)",
-      "Bash(git rm *)"
+      "Bash(git rm *)",
+      "Bash(python3 *)",
+      "Bash(sed 's/<w:pStyle w:val=\"Title\"\\\\/>/<w:pStyle w:val=\"Employer\"\\\\/>/')",
+      "Bash(cp /tmp/document_fixed.xml word/document.xml)",
+      "Bash(node *)"
     ]
   }
 }
