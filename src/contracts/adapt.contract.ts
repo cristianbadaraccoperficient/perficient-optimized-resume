@@ -69,11 +69,17 @@ export const TransferableSkillSchema = z.object({
   bridge_statement: z.string(),
 });
 
+export const StrengthsArraySchema = z.array(StrengthSchema).min(3).max(5);
+export const GapsArraySchema = z.array(GapSchema);
+export const TransferableSkillsArraySchema = z.array(TransferableSkillSchema).min(2).max(4);
+
 export const InsightsResultSchema = z.object({
   strengths: z.array(StrengthSchema),
   gaps: z.array(GapSchema),
   transferable_skills: z.array(TransferableSkillSchema),
 });
+
+export type InsightsSectionType = 'strengths' | 'gaps' | 'transferable_skills';
 
 export const ResumeResultSchema = z.object({
   adapted_resume: AdaptedResumeSchema,

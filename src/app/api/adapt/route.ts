@@ -1,7 +1,40 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { AdaptRequestSchema, InsightsResultSchema } from '@/contracts/adapt.contract';
+import { AdaptRequestSchema, StrengthsArraySchema, GapsArraySchema, TransferableSkillsArraySchema } from '@/contracts/adapt.contract';
 import { readJSON, readMarkdown } from '@/lib/storage';
 import { portkey } from '@/lib/portkey';
+import { SseJsonParser, SectionKey } from '@/lib/sse-json-parser';
+
+const SSE_HEADERS = {
+  'Content-Type': 'text/event-stream',
+  'Cache-Control': 'no-cache',
+  'Connection': 'keep-alive',
+  'X-Accel-Buffering': 'no',
+};
+
+function sseEvent(event: string, data: unknown): string {
+  return `event: ${event}\ndata: ${JSON.stringify(data)}\n\n`;
+}
+
+function validateSection(key: SectionKey, raw: string): { valid: boolean; data?: unknown; error?: string } {
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(raw);
+  } catch {
+    return { valid: false, error: `Invalid JSON for section "${key}"` };
+  }
+
+  const schemaMap = {
+    strengths: StrengthsArraySchema,
+    gaps: GapsArraySchema,
+    transferable_skills: TransferableSkillsArraySchema,
+  };
+
+  const result = schemaMap[key].safeParse(parsed);
+  if (!result.success) {
+    return { valid: false, error: `Validation failed for "${key}": ${result.error.message}` };
+  }
+  return { valid: true, data: result.data };
+}
 
 interface PortkeyErrorInfo {
   type: string;
@@ -48,54 +81,48 @@ function extractPortkeyError(error: unknown): PortkeyErrorInfo {
 export async function POST(request: NextRequest) {
   const startTime = Date.now();
 
+  let body;
   try {
-    const body = await request.json();
+    body = await request.json();
+  } catch {
+    return NextResponse.json(
+      { success: false, error: { code: 'VALIDATION_ERROR', message: 'Invalid JSON body' } },
+      { status: 400 }
+    );
+  }
 
-    const parseResult = AdaptRequestSchema.safeParse(body);
+  const parseResult = AdaptRequestSchema.safeParse(body);
+  if (!parseResult.success) {
+    return NextResponse.json(
+      { success: false, error: { code: 'VALIDATION_ERROR', message: 'Invalid request data' } },
+      { status: 400 }
+    );
+  }
 
-    if (!parseResult.success) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: {
-            code: 'VALIDATION_ERROR',
-            message: 'Invalid request data',
-          },
-        },
-        { status: 400 }
-      );
-    }
+  const { job_description, model } = parseResult.data;
 
-    const { job_description, model } = parseResult.data;
+  const [resume, explanationData] = await Promise.all([
+    readJSON('resume.json'),
+    readJSON<{ raw_text: string; formatted_md: string | null }>('explanation.json'),
+  ]);
 
-    const [resume, explanationData] = await Promise.all([
-      readJSON('resume.json'),
-      readJSON<{ raw_text: string; formatted_md: string | null }>('explanation.json'),
-    ]);
+  if (!resume) {
+    return NextResponse.json(
+      { success: false, error: { code: 'RESUME_NOT_FOUND', message: 'No resume found. Please upload a resume first.' } },
+      { status: 404 }
+    );
+  }
 
-    if (!resume) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: {
-            code: 'RESUME_NOT_FOUND',
-            message: 'No resume found. Please upload a resume first.',
-          },
-        },
-        { status: 404 }
-      );
-    }
+  let explanation: string | null = null;
+  if (explanationData) {
+    explanation = explanationData.formatted_md || explanationData.raw_text;
+  } else {
+    explanation = await readMarkdown('explanation.md');
+  }
 
-    let explanation: string | null = null;
-    if (explanationData) {
-      explanation = explanationData.formatted_md || explanationData.raw_text;
-    } else {
-      explanation = await readMarkdown('explanation.md');
-    }
+  const modelToUse = model || '@dsvertex/anthropic.claude-sonnet-4-6';
 
-    const modelToUse = model || '@dsvertex/anthropic.claude-sonnet-4-6';
-
-    const systemPrompt = `You are a career coaching expert specializing in Perficient consulting roles. Analyze the candidate's resume against the provided context and job description (if any) and return interview preparation insights.
+  const systemPrompt = `You are a career coaching expert specializing in Perficient consulting roles. Analyze the candidate's resume against the provided context and job description (if any) and return interview preparation insights.
 
 NEVER fabricate experience not present in the resume. Base all analysis strictly on the provided resume content.
 
@@ -128,153 +155,118 @@ Return a JSON object with this exact structure:
 Keep responses concise: talking_points max 2 sentences, mitigation max 1 sentence, bridge_statement max 2 sentences.
 Return 3-5 strengths, all meaningful gaps (0 is valid), and 2-4 transferable skills.`;
 
-    const resumeContent = (resume as { formatted_md?: string; raw_text?: string }).formatted_md
-      || (resume as { raw_text?: string }).raw_text
-      || JSON.stringify(resume, null, 2);
+  const resumeContent = (resume as { formatted_md?: string; raw_text?: string }).formatted_md
+    || (resume as { raw_text?: string }).raw_text
+    || JSON.stringify(resume, null, 2);
 
-    const userMessage = `Resume Data:
+  const userMessage = `Resume Data:
 ${resumeContent}
 ${explanation ? `\nAdditional Context:\n${explanation}\n` : ''}${job_description ? `\nJob Description:\n${job_description}\n\nPlease adapt the resume to this job description and provide interview insights.` : '\nPlease reformat and optimize this resume to the Perficient style and standards.'}`;
 
-    let aiResponse;
-    try {
-      aiResponse = await portkey.chat.completions.create({
-        model: modelToUse,
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: userMessage },
-        ],
-        response_format: { type: 'json_object' },
-        max_tokens: 4096,
-        timeout: 90000,
-      });
-    } catch (error: unknown) {
-      const errorInfo = extractPortkeyError(error);
-
-      console.error('[adapt/insights POST] Portkey call failed:', JSON.stringify({
-        type: errorInfo.type,
-        status: errorInfo.status,
-        message: errorInfo.message,
-        cause: errorInfo.cause,
-        model: modelToUse,
-        timestamp: new Date().toISOString(),
-      }, null, 2));
-
-      if (errorInfo.status === 429) {
-        return NextResponse.json(
-          { success: false, error: { code: 'RATE_LIMITED', message: 'Rate limit exceeded. Please try again later.' } },
-          { status: 429 }
-        );
-      }
-
-      const httpStatus = (errorInfo.status && errorInfo.status >= 400 && errorInfo.status < 600)
-        ? errorInfo.status
-        : 500;
-
-      return NextResponse.json(
-        {
-          success: false,
-          error: {
-            code: 'AI_PROCESSING_ERROR',
-            message: 'Failed to process request with AI service',
-            ...(process.env.NODE_ENV === 'development' && { details: errorInfo }),
-          },
-        },
-        { status: httpStatus }
-      );
-    }
-
-    const finishReason = aiResponse.choices[0]?.finish_reason;
-    if (finishReason === 'length') {
-      console.error('[adapt/insights POST] AI response truncated by max_tokens limit');
-      return NextResponse.json(
-        {
-          success: false,
-          error: {
-            code: 'AI_RESPONSE_TRUNCATED',
-            message: 'AI response was truncated. The resume may be too long to process in one request.',
-          },
-        },
-        { status: 500 }
-      );
-    }
-
-    const rawContent = aiResponse.choices[0]?.message?.content;
-    if (!rawContent || typeof rawContent !== 'string') {
-      return NextResponse.json(
-        {
-          success: false,
-          error: {
-            code: 'AI_RESPONSE_INVALID',
-            message: 'AI service returned an empty response',
-          },
-        },
-        { status: 500 }
-      );
-    }
-
-    // Strip markdown code fences if the model wraps JSON in ```json ... ```
-    const responseContent = rawContent.replace(/^```(?:json)?\s*\n?/i, '').replace(/\n?```\s*$/i, '').trim();
-
-    let parsedResponse;
-    try {
-      parsedResponse = JSON.parse(responseContent);
-    } catch {
-      console.error('[adapt/insights POST] Invalid JSON from AI. First 500 chars:', responseContent.slice(0, 500));
-      return NextResponse.json(
-        {
-          success: false,
-          error: {
-            code: 'AI_RESPONSE_INVALID',
-            message: 'AI service returned invalid JSON',
-            ...(process.env.NODE_ENV === 'development' && { raw_preview: responseContent.slice(0, 500) }),
-          },
-        },
-        { status: 500 }
-      );
-    }
-
-    const validationResult = InsightsResultSchema.safeParse(parsedResponse);
-    if (!validationResult.success) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: {
-            code: 'AI_RESPONSE_INVALID',
-            message: 'AI service returned data that does not match expected schema',
-          },
-        },
-        { status: 500 }
-      );
-    }
-
-    const processingTime = Date.now() - startTime;
-
-    return NextResponse.json({
-      success: true,
-      data: validationResult.data,
-      metadata: {
-        model_used: modelToUse,
-        tokens_used: aiResponse.usage?.total_tokens || 0,
-        processing_time_ms: processingTime,
-        portkey_request_id: aiResponse.id || 'unknown',
-      },
+  let aiStream: AsyncIterable<any>;
+  try {
+    aiStream = await portkey.chat.completions.create({
+      model: modelToUse,
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userMessage },
+      ],
+      response_format: { type: 'json_object' },
+      max_tokens: 4096,
+      stream: true,
+      timeout: 90000,
     });
+  } catch (error: unknown) {
+    const errorInfo = extractPortkeyError(error);
 
-  } catch (error) {
-    console.error('[adapt/insights POST] Unexpected error:', error instanceof Error ? error.stack : error);
+    console.error('[adapt/insights POST] Portkey stream init failed:', JSON.stringify({
+      type: errorInfo.type,
+      status: errorInfo.status,
+      message: errorInfo.message,
+      cause: errorInfo.cause,
+      model: modelToUse,
+      timestamp: new Date().toISOString(),
+    }, null, 2));
+
+    if (errorInfo.status === 429) {
+      return NextResponse.json(
+        { success: false, error: { code: 'RATE_LIMITED', message: 'Rate limit exceeded. Please try again later.' } },
+        { status: 429 }
+      );
+    }
+
+    const httpStatus = (errorInfo.status && errorInfo.status >= 400 && errorInfo.status < 600)
+      ? errorInfo.status
+      : 500;
+
     return NextResponse.json(
       {
         success: false,
         error: {
-          code: 'INTERNAL_ERROR',
-          message: 'An unexpected error occurred',
-          ...(process.env.NODE_ENV === 'development' && {
-            details: error instanceof Error ? { message: error.message, stack: error.stack } : String(error),
-          }),
+          code: 'AI_PROCESSING_ERROR',
+          message: 'Failed to process request with AI service',
+          ...(process.env.NODE_ENV === 'development' && { details: errorInfo }),
         },
       },
-      { status: 500 }
+      { status: httpStatus }
     );
   }
+
+  const readableStream = new ReadableStream({
+    async start(controller) {
+      const encoder = new TextEncoder();
+      const parser = new SseJsonParser();
+
+      try {
+        for await (const chunk of aiStream) {
+          const delta = chunk.choices?.[0]?.delta?.content;
+          if (!delta) continue;
+
+          const sections = parser.append(delta);
+          for (const section of sections) {
+            const validation = validateSection(section.key, section.raw);
+            if (validation.valid) {
+              controller.enqueue(encoder.encode(sseEvent('section', { type: section.key, data: validation.data })));
+            } else {
+              console.warn(`[adapt/insights SSE] Section "${section.key}" validation failed:`, validation.error);
+              controller.enqueue(encoder.encode(sseEvent('section', { type: section.key, data: JSON.parse(section.raw) })));
+            }
+          }
+
+          const finishReason = chunk.choices?.[0]?.finish_reason;
+          if (finishReason === 'length') {
+            controller.enqueue(encoder.encode(sseEvent('error', {
+              code: 'AI_RESPONSE_TRUNCATED',
+              message: 'AI response was truncated. The resume may be too long to process.',
+            })));
+            controller.close();
+            return;
+          }
+        }
+
+        const processingTime = Date.now() - startTime;
+        controller.enqueue(encoder.encode(sseEvent('done', {
+          metadata: {
+            model_used: modelToUse,
+            processing_time_ms: processingTime,
+          },
+        })));
+        controller.close();
+      } catch (error: unknown) {
+        const errorInfo = extractPortkeyError(error);
+        console.error('[adapt/insights SSE] Stream error:', errorInfo);
+        try {
+          controller.enqueue(encoder.encode(sseEvent('error', {
+            code: 'AI_STREAM_ERROR',
+            message: errorInfo.message || 'Stream interrupted',
+          })));
+          controller.close();
+        } catch {
+          // Controller may already be closed
+        }
+      }
+    },
+  });
+
+  return new Response(readableStream, { headers: SSE_HEADERS });
 }

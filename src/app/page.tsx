@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import ResumeUpload from "@/components/ResumeUpload";
 import ExplanationInput from "@/components/ExplanationInput";
 import JobDescriptionInput from "@/components/JobDescriptionInput";
 import ResultsPanel from "@/components/ResultsPanel";
-import { InsightsResult, AdaptedResume } from "@/contracts/adapt.contract";
+import { AdaptedResume, InsightsResult } from "@/contracts/adapt.contract";
+import { useInsightsStream } from "@/lib/useInsightsStream";
 
 interface ResumeData {
   filename: string;
@@ -25,13 +26,23 @@ export default function Home() {
   );
   const [explanationFormattedMd, setExplanationFormattedMd] = useState<string | null>(null);
   const [jobDescription, setJobDescription] = useState<string>("");
-  const [insightsResult, setInsightsResult] = useState<InsightsResult | null>(null);
+  const { startStream, strengths, gaps, transferableSkills, isStreaming, error: streamError, reset: resetStream } = useInsightsStream();
   const [resumeResult, setResumeResult] = useState<AdaptedResume | null>(null);
-  const [isLoadingInsights, setIsLoadingInsights] = useState(false);
   const [isLoadingResume, setIsLoadingResume] = useState(false);
-  const [insightsError, setInsightsError] = useState<string | null>(null);
   const [resumeError, setResumeError] = useState<string | null>(null);
   const [progressMsg, setProgressMsg] = useState<string>("Processing...");
+
+  const isLoadingInsights = isStreaming;
+  const insightsError = streamError;
+
+  const insightsResult: InsightsResult | null = useMemo(() => {
+    if (!strengths && !gaps && !transferableSkills) return null;
+    return {
+      strengths: strengths || [],
+      gaps: gaps || [],
+      transferable_skills: transferableSkills || [],
+    };
+  }, [strengths, gaps, transferableSkills]);
 
   useEffect(() => {
     async function loadExisting() {
@@ -103,29 +114,19 @@ export default function Home() {
     abortControllerRef.current = controller;
     const { signal } = controller;
 
-    setIsLoadingInsights(true);
+    resetStream();
     setIsLoadingResume(true);
-    setInsightsResult(null);
     setResumeResult(null);
-    setInsightsError(null);
     setResumeError(null);
 
-    const body = JSON.stringify({
+    const payload = {
       ...(jobDescription.length >= 50 ? { job_description: jobDescription } : {}),
-    });
-    const headers = { "Content-Type": "application/json" };
+    };
 
-    fetch("/api/adapt", { method: "POST", headers, body, signal })
-      .then((r) => r.json())
-      .then((data) => {
-        if (data.success) {
-          setInsightsResult(data.data);
-        } else {
-          setInsightsError(data.error?.message || "Failed to generate insights");
-        }
-      })
-      .catch((e) => { if (e.name !== "AbortError") setInsightsError("Network error. Please try again."); })
-      .finally(() => setIsLoadingInsights(false));
+    startStream(payload, signal);
+
+    const body = JSON.stringify(payload);
+    const headers = { "Content-Type": "application/json" };
 
     fetch("/api/adapt/resume", { method: "POST", headers, body, signal })
       .then((r) => r.json())

@@ -228,7 +228,7 @@ export default function ResultsPanel({
             {/* Insights tabs */}
             {isInsightsTab && (
               <>
-                {insightsError ? (
+                {insightsError && !insightsResult ? (
                   <div className="p-4 border border-red-200 rounded bg-red-50">
                     <p className="text-sm text-red-800 mb-3">{insightsError}</p>
                     {onRetry && (
@@ -240,118 +240,151 @@ export default function ResultsPanel({
                       </button>
                     )}
                   </div>
-                ) : isLoadingInsights ? (
-                  <>
-                    <ActivityHeader
-                      msgIdx={insightsMsgIdx}
-                      messages={INSIGHTS_MESSAGES}
-                    />
-                    <SkeletonCards />
-                  </>
-                ) : insightsResult ? (
+                ) : (
                   <>
                     {activeTab === "strengths" && (
-                      <div role="tabpanel" className="space-y-3">
-                        {insightsResult.strengths.map((strength, index) => (
-                          <div
-                            key={index}
-                            className="p-3 sm:p-4 border border-gray-200 rounded bg-white"
-                          >
-                            <h3 className="font-semibold text-sm mb-2">
-                              {strength.area}
-                            </h3>
-                            <p className="text-xs text-gray-600 mb-1">
-                              <span className="font-medium">Evidence:</span>{" "}
-                              {strength.evidence}
-                            </p>
-                            <p className="text-xs text-gray-600">
-                              <span className="font-medium">
-                                Talking Point:
-                              </span>{" "}
-                              {strength.talking_point}
-                            </p>
+                      <>
+                        {insightsResult && insightsResult.strengths.length > 0 ? (
+                          <div role="tabpanel" className="space-y-3">
+                            {insightsResult.strengths.map((strength, index) => (
+                              <div
+                                key={index}
+                                className="p-3 sm:p-4 border border-gray-200 rounded bg-white"
+                              >
+                                <h3 className="font-semibold text-sm mb-2">
+                                  {strength.area}
+                                </h3>
+                                <p className="text-xs text-gray-600 mb-1">
+                                  <span className="font-medium">Evidence:</span>{" "}
+                                  {strength.evidence}
+                                </p>
+                                <p className="text-xs text-gray-600">
+                                  <span className="font-medium">
+                                    Talking Point:
+                                  </span>{" "}
+                                  {strength.talking_point}
+                                </p>
+                              </div>
+                            ))}
                           </div>
-                        ))}
-                        {insightsResult.strengths.length === 0 && (
+                        ) : isLoadingInsights ? (
+                          <>
+                            <ActivityHeader
+                              msgIdx={insightsMsgIdx}
+                              messages={INSIGHTS_MESSAGES}
+                            />
+                            <SkeletonCards />
+                          </>
+                        ) : insightsResult?.strengths.length === 0 ? (
                           <p className="text-sm text-gray-400 text-center py-8">
                             No strengths identified
                           </p>
-                        )}
-                      </div>
+                        ) : null}
+                      </>
                     )}
 
                     {activeTab === "gaps" && (
-                      <div role="tabpanel" className="space-y-3">
-                        {insightsResult.gaps.map((gap, index) => (
-                          <div
-                            key={index}
-                            className="p-3 sm:p-4 border border-gray-200 rounded bg-white"
-                          >
-                            <div className="flex flex-wrap items-start justify-between gap-1 mb-2">
-                              <h3 className="font-semibold text-sm">
-                                {gap.skill}
-                              </h3>
-                              <span
-                                className={`px-2 py-0.5 rounded text-xs font-medium ${
-                                  gap.severity === "critical"
-                                    ? "bg-orange-100 text-orange-700"
-                                    : "bg-gray-100 text-gray-600"
-                                }`}
-                              >
-                                {gap.severity === "critical"
-                                  ? "Critical"
-                                  : "Nice-to-have"}
-                              </span>
-                            </div>
-                            <p className="text-xs text-gray-600">
-                              <span className="font-medium">Mitigation:</span>{" "}
-                              {gap.mitigation}
-                            </p>
+                      <>
+                        {insightsResult && insightsResult.gaps !== undefined ? (
+                          <div role="tabpanel" className="space-y-3">
+                            {insightsResult.gaps.length > 0 ? (
+                              insightsResult.gaps.map((gap, index) => (
+                                <div
+                                  key={index}
+                                  className="p-3 sm:p-4 border border-gray-200 rounded bg-white"
+                                >
+                                  <div className="flex flex-wrap items-start justify-between gap-1 mb-2">
+                                    <h3 className="font-semibold text-sm">
+                                      {gap.skill}
+                                    </h3>
+                                    <span
+                                      className={`px-2 py-0.5 rounded text-xs font-medium ${
+                                        gap.severity === "critical"
+                                          ? "bg-orange-100 text-orange-700"
+                                          : "bg-gray-100 text-gray-600"
+                                      }`}
+                                    >
+                                      {gap.severity === "critical"
+                                        ? "Critical"
+                                        : "Nice-to-have"}
+                                    </span>
+                                  </div>
+                                  <p className="text-xs text-gray-600">
+                                    <span className="font-medium">Mitigation:</span>{" "}
+                                    {gap.mitigation}
+                                  </p>
+                                </div>
+                              ))
+                            ) : (
+                              <p className="text-sm text-gray-400 text-center py-8">
+                                No gaps identified
+                              </p>
+                            )}
                           </div>
-                        ))}
-                        {insightsResult.gaps.length === 0 && (
-                          <p className="text-sm text-gray-400 text-center py-8">
-                            No gaps identified
-                          </p>
-                        )}
-                      </div>
+                        ) : isLoadingInsights ? (
+                          <>
+                            <ActivityHeader
+                              msgIdx={insightsMsgIdx}
+                              messages={INSIGHTS_MESSAGES}
+                            />
+                            <SkeletonCards />
+                          </>
+                        ) : null}
+                      </>
                     )}
 
                     {activeTab === "transferable" && (
-                      <div role="tabpanel" className="space-y-3">
-                        {insightsResult.transferable_skills.map(
-                          (skill, index) => (
-                            <div
-                              key={index}
-                              className="p-3 sm:p-4 border border-gray-200 rounded bg-white"
-                            >
-                              <h3 className="font-semibold text-sm mb-2">
-                                {skill.skill}
-                              </h3>
-                              <p className="text-xs text-gray-600 mb-1">
-                                <span className="font-medium">Source:</span>{" "}
-                                {skill.source_experience}
-                              </p>
-                              <p className="text-xs text-gray-600 mb-1">
-                                <span className="font-medium">Relevance:</span>{" "}
-                                {skill.relevance_to_role}
-                              </p>
-                              <p className="text-xs text-gray-600">
-                                <span className="font-medium">Bridge:</span>{" "}
-                                {skill.bridge_statement}
-                              </p>
-                            </div>
-                          ),
-                        )}
-                        {insightsResult.transferable_skills.length === 0 && (
+                      <>
+                        {insightsResult && insightsResult.transferable_skills.length > 0 ? (
+                          <div role="tabpanel" className="space-y-3">
+                            {insightsResult.transferable_skills.map(
+                              (skill, index) => (
+                                <div
+                                  key={index}
+                                  className="p-3 sm:p-4 border border-gray-200 rounded bg-white"
+                                >
+                                  <h3 className="font-semibold text-sm mb-2">
+                                    {skill.skill}
+                                  </h3>
+                                  <p className="text-xs text-gray-600 mb-1">
+                                    <span className="font-medium">Source:</span>{" "}
+                                    {skill.source_experience}
+                                  </p>
+                                  <p className="text-xs text-gray-600 mb-1">
+                                    <span className="font-medium">Relevance:</span>{" "}
+                                    {skill.relevance_to_role}
+                                  </p>
+                                  <p className="text-xs text-gray-600">
+                                    <span className="font-medium">Bridge:</span>{" "}
+                                    {skill.bridge_statement}
+                                  </p>
+                                </div>
+                              ),
+                            )}
+                          </div>
+                        ) : isLoadingInsights ? (
+                          <>
+                            <ActivityHeader
+                              msgIdx={insightsMsgIdx}
+                              messages={INSIGHTS_MESSAGES}
+                            />
+                            <SkeletonCards />
+                          </>
+                        ) : insightsResult?.transferable_skills.length === 0 ? (
                           <p className="text-sm text-gray-400 text-center py-8">
                             No transferable skills identified
                           </p>
-                        )}
+                        ) : null}
+                      </>
+                    )}
+
+                    {insightsError && insightsResult && (
+                      <div className="mt-3 p-3 border border-amber-200 rounded bg-amber-50">
+                        <p className="text-xs text-amber-800">{insightsError}</p>
                       </div>
                     )}
                   </>
-                ) : null}
+                )}
               </>
             )}
 
