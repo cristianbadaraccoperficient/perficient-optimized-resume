@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import ResumeUpload from "@/components/ResumeUpload";
 import ExplanationInput from "@/components/ExplanationInput";
 import JobDescriptionInput from "@/components/JobDescriptionInput";
@@ -91,7 +91,18 @@ export default function Home() {
     setExplanationStatus("saved");
   };
 
+  const abortControllerRef = useRef<AbortController | null>(null);
+
+  useEffect(() => {
+    return () => { abortControllerRef.current?.abort(); };
+  }, []);
+
   const handleAdapt = () => {
+    abortControllerRef.current?.abort();
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+    const { signal } = controller;
+
     setIsLoadingInsights(true);
     setIsLoadingResume(true);
     setInsightsResult(null);
@@ -104,7 +115,7 @@ export default function Home() {
     });
     const headers = { "Content-Type": "application/json" };
 
-    fetch("/api/adapt", { method: "POST", headers, body })
+    fetch("/api/adapt", { method: "POST", headers, body, signal })
       .then((r) => r.json())
       .then((data) => {
         if (data.success) {
@@ -113,10 +124,10 @@ export default function Home() {
           setInsightsError(data.error?.message || "Failed to generate insights");
         }
       })
-      .catch(() => setInsightsError("Network error. Please try again."))
+      .catch((e) => { if (e.name !== "AbortError") setInsightsError("Network error. Please try again."); })
       .finally(() => setIsLoadingInsights(false));
 
-    fetch("/api/adapt/resume", { method: "POST", headers, body })
+    fetch("/api/adapt/resume", { method: "POST", headers, body, signal })
       .then((r) => r.json())
       .then((data) => {
         if (data.success) {
@@ -125,7 +136,7 @@ export default function Home() {
           setResumeError(data.error?.message || "Failed to generate resume");
         }
       })
-      .catch(() => setResumeError("Network error. Please try again."))
+      .catch((e) => { if (e.name !== "AbortError") setResumeError("Network error. Please try again."); })
       .finally(() => setIsLoadingResume(false));
   };
 

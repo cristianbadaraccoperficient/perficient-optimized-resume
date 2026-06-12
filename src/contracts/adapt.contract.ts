@@ -1,8 +1,13 @@
 import { z } from 'zod';
 
+export const ALLOWED_MODELS = [
+  '@dsvertex/anthropic.claude-sonnet-4-6',
+  '@dsvertex/anthropic.claude-haiku-4-5',
+] as const;
+
 export const AdaptRequestSchema = z.object({
   job_description: z.string().min(50).max(20000).optional(),
-  model: z.string().optional(),
+  model: z.enum(ALLOWED_MODELS).optional(),
 });
 
 const NameSchema = z.object({
