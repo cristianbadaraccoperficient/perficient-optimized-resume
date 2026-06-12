@@ -1,11 +1,9 @@
 {
-  "name": "perficient-optimized-resume",
+  "name": "perficient-careerfit",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "directories": {
-    "doc": "docs"
-  },
+  "description": "AI-powered resume optimizer for Perficient consulting. Adapts resumes to Perficient corporate style and tailors them to specific job descriptions using Claude via Portkey.",
+  "author": "Cristian Badaracco",
+  "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -17,7 +15,6 @@
     "url": "git+https://github.com/cristianbadaraccoperficient/perficient-optimized-resume.git"
   },
   "keywords": [],
-  "author": "",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/cristianbadaraccoperficient/perficient-optimized-resume/issues"

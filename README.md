@@ -1,6 +1,6 @@
 # Perficient CareerFit
 
-AI-powered resume optimizer for Perficient consulting. Upload your resume, optionally add strategic context and a job description, and get an adapted resume in Perficient's corporate format plus interview insights — all exported as a ready-to-submit DOCX.
+AI-powered resume optimizer for Perficient consulting. Built by **Cristian Badaracco**. Upload your resume, optionally add strategic context and a job description, and get an adapted resume in Perficient's corporate format plus interview insights — all exported as a ready-to-submit DOCX.
 
 ---
 
