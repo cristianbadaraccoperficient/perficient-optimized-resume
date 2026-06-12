@@ -174,7 +174,7 @@ export default function ResultsPanel({
   return (
     <div className="flex flex-col h-full">
       {/* Tabs */}
-      <div className="flex items-center gap-2 px-5 pt-4 pb-3 border-b border-gray-200 bg-[#f5f4f0]">
+      <div className="flex items-center flex-wrap gap-1.5 sm:gap-2 px-3 sm:px-5 pt-4 pb-3 border-b border-gray-200 bg-[#f5f4f0]">
         {(["strengths", "gaps", "transferable", "export"] as TabType[]).map(
           (tab) => (
             <button
@@ -199,9 +199,9 @@ export default function ResultsPanel({
       </div>
 
       {/* Panel content */}
-      <div className="flex-1 overflow-y-auto px-5 py-4">
+      <div className="flex-1 overflow-y-auto px-3 md:px-5 py-4">
         {!hasAnyActivity ? (
-          <div className="flex flex-col items-center justify-center h-full min-h-[360px] text-center">
+          <div className="flex flex-col items-center justify-center h-full min-h-[240px] sm:min-h-[360px] text-center">
             <svg
               className="w-10 h-10 text-gray-300 mb-4"
               fill="none"
@@ -255,7 +255,7 @@ export default function ResultsPanel({
                         {insightsResult.strengths.map((strength, index) => (
                           <div
                             key={index}
-                            className="p-4 border border-gray-200 rounded bg-white"
+                            className="p-3 sm:p-4 border border-gray-200 rounded bg-white"
                           >
                             <h3 className="font-semibold text-sm mb-2">
                               {strength.area}
@@ -285,9 +285,9 @@ export default function ResultsPanel({
                         {insightsResult.gaps.map((gap, index) => (
                           <div
                             key={index}
-                            className="p-4 border border-gray-200 rounded bg-white"
+                            className="p-3 sm:p-4 border border-gray-200 rounded bg-white"
                           >
-                            <div className="flex items-start justify-between mb-2">
+                            <div className="flex flex-wrap items-start justify-between gap-1 mb-2">
                               <h3 className="font-semibold text-sm">
                                 {gap.skill}
                               </h3>
@@ -323,7 +323,7 @@ export default function ResultsPanel({
                           (skill, index) => (
                             <div
                               key={index}
-                              className="p-4 border border-gray-200 rounded bg-white"
+                              className="p-3 sm:p-4 border border-gray-200 rounded bg-white"
                             >
                               <h3 className="font-semibold text-sm mb-2">
                                 {skill.skill}
@@ -386,7 +386,7 @@ export default function ResultsPanel({
       </div>
 
       {/* Bottom download bar */}
-      <div className="border-t border-gray-200 px-5 py-3 flex items-center gap-3 bg-[#f5f4f0]">
+      <div className="border-t border-gray-200 px-3 md:px-5 py-3 flex items-center gap-2 sm:gap-3 bg-[#f5f4f0]">
         <span className="text-xs font-semibold border border-gray-300 rounded px-1.5 py-0.5 text-gray-500 tracking-widest">
           DOCX
         </span>

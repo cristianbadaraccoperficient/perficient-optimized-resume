@@ -143,9 +143,9 @@ export default function Home() {
   const canTailor = resumeStatus === "uploaded" && !isAdapting;
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="h-screen flex flex-col overflow-hidden">
       {/* Header */}
-      <header className="flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-[#f5f4f0]">
+      <header className="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-gray-200 bg-[#f5f4f0]">
         <div className="flex items-center gap-2">
           <svg
             width="18"
@@ -163,9 +163,9 @@ export default function Home() {
       </header>
 
       {/* Main two-column layout */}
-      <div className="flex flex-1 overflow-hidden">
+      <div className="main-layout flex flex-col flex-1 overflow-y-auto">
         {/* Left column */}
-        <div className="w-1/2 flex flex-col gap-3 p-4 overflow-y-auto border-r border-gray-200">
+        <div className="main-col-left w-full flex flex-col gap-3 p-4 border-b border-gray-200">
           <ResumeUpload
             onUploadSuccess={handleUploadSuccess}
             onUploadError={() => {}}
@@ -209,7 +209,7 @@ export default function Home() {
         </div>
 
         {/* Right column */}
-        <div className="w-1/2 flex flex-col overflow-hidden">
+        <div className="main-col-right w-full flex flex-col min-h-[400px]">
           <ResultsPanel
             insightsResult={insightsResult}
             resumeResult={resumeResult}

@@ -10,3 +10,22 @@ body {
   background: var(--background);
   font-family: ui-monospace, 'SF Mono', 'Cascadia Code', 'Courier New', monospace;
 }
+
+/* Two-column layout — guaranteed regardless of Tailwind class scanning */
+@media (min-width: 640px) {
+  .main-layout {
+    flex-direction: row !important;
+    overflow: hidden !important;
+  }
+  .main-col-left {
+    width: 50% !important;
+    overflow-y: auto !important;
+    border-bottom: none !important;
+    border-right: 1px solid #e5e7eb !important;
+  }
+  .main-col-right {
+    width: 50% !important;
+    overflow: hidden !important;
+    min-height: 0 !important;
+  }
+}

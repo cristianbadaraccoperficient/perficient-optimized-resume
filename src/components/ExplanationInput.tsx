@@ -113,7 +113,7 @@ export default function ExplanationInput({
       {/* Textarea / Preview */}
       <div className="px-4 pb-3">
         {showPreview && formattedMd ? (
-          <div className="w-full min-h-[120px] p-2 border border-gray-200 rounded text-sm bg-gray-50 text-gray-700 overflow-y-auto max-h-[300px] whitespace-pre-wrap">
+          <div className="w-full min-h-[120px] p-2 border border-gray-200 rounded text-sm bg-gray-50 text-gray-700 overflow-y-auto max-h-[200px] sm:max-h-[300px] whitespace-pre-wrap">
             {formattedMd}
           </div>
         ) : (
@@ -134,7 +134,7 @@ export default function ExplanationInput({
       </div>
 
       {/* Footer row */}
-      <div className="flex items-center justify-end px-4 pb-3 gap-3">
+      <div className="flex flex-wrap items-center justify-end px-4 pb-3 gap-2 sm:gap-3">
         {warningMessage && (
           <span className="text-xs text-amber-500">{warningMessage}</span>
         )}
